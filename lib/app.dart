@@ -3,8 +3,9 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
-import 'package:scbrf/screens/home.dart';
+import 'package:scbrf/screens/screen.dart';
 import 'package:scbrf/actions/actions.dart';
+import 'package:scbrf/middleware/middleware.dart';
 
 class ScbrfApp extends StatelessWidget {
   final Store<AppState> store;
@@ -18,13 +19,16 @@ class ScbrfApp extends StatelessWidget {
     return StoreProvider(
       store: store,
       child: MaterialApp(
+        initialRoute: ScbrfRoutes.loading,
+        navigatorKey: navigatorKey,
         routes: {
-          ScbrfRoutes.home: (context) {
+          ScbrfRoutes.home: (context) => const HomeScreen(),
+          ScbrfRoutes.loading: (context) {
             onInit() {
               StoreProvider.of<AppState>(context).dispatch(FindStationAction());
             }
 
-            return HomeScreen(
+            return LoadingScreen(
               onInit,
             );
           },

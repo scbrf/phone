@@ -5,11 +5,11 @@ import 'package:scbrf/models/models.dart';
 
 void main() {
   Article a1 = Article(
-      timestamp: DateTime.now().millisecondsSinceEpoch,
+      created: DateTime.now().millisecondsSinceEpoch,
       read: false,
       starred: false);
   Article a2 = Article(
-      timestamp: DateTime.now().millisecondsSinceEpoch - 1000 * 3600 * 24,
+      created: DateTime.now().millisecondsSinceEpoch - 1000 * 3600 * 24,
       read: false,
       starred: true);
   test('articles', () {
@@ -39,12 +39,12 @@ void main() {
     expect(
         articlesSelector(const AppState(
             focusPlanet: 'following:p1',
-            following: [FollowingPlanet(title: 'p1title', id: "p1")])).title,
+            following: [FollowingPlanet(name: 'p1title', id: "p1")])).title,
         'p1title');
     expect(
         articlesSelector(const AppState(
             focusPlanet: 'my:p1',
-            planets: [Planet(title: 'p1title', id: "p1")])).title,
+            planets: [Planet(name: 'p1title', id: "p1")])).title,
         'p1title');
   });
 

@@ -13,9 +13,9 @@ List<Article> getTodayArticles(List<FollowingPlanet> following) {
       (value, p) => [
             ...value,
             ...p.articles.where((a) {
-              DateTime date = DateTime.fromMillisecondsSinceEpoch(a.timestamp);
+              DateTime date = DateTime.fromMillisecondsSinceEpoch(a.created);
               log.d(
-                  'article date is ${a.timestamp} ${date.year} ${date.month} ${date.day}');
+                  'article date is ${a.created} ${date.year} ${date.month} ${date.day}');
               return date.year == today.year &&
                   date.month == today.month &&
                   date.day == today.day;
@@ -76,12 +76,12 @@ Articles articlesSelector(AppState s) {
   } else if (s.focusPlanet.startsWith('my:')) {
     Planet p = s.planets
         .firstWhere((p) => p.id == s.focusPlanet.substring('my:'.length));
-    articlesTitle = p.title;
+    articlesTitle = p.name;
     articles = p.articles;
   } else {
     FollowingPlanet p = s.following.firstWhere(
         (p) => p.id == s.focusPlanet.substring('following:'.length));
-    articlesTitle = p.title;
+    articlesTitle = p.name;
     articles = p.articles;
   }
   return Articles(title: articlesTitle, articles: articles);
