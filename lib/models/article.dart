@@ -6,10 +6,12 @@ class Article {
   final bool read;
   final bool starred;
   final String title;
+  final String url;
   const Article(
       {this.created = 0,
       this.read = false,
       this.starred = false,
+      this.url = '',
       this.title = ""});
 
   static fromJson(Map<String, dynamic> json) {

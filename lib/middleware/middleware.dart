@@ -22,6 +22,11 @@ List<Middleware<AppState>> createMiddleware() {
       next(action);
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.articles);
     })),
+    TypedMiddleware<AppState, FocusArticleSelectedAction>(
+        ((store, action, next) {
+      next(action);
+      navigatorKey.currentState!.pushNamed(ScbrfRoutes.webiew);
+    })),
   ];
 }
 
@@ -74,5 +79,7 @@ findStation(Store<AppState> store, action, NextDispatcher next) async {
   store.dispatch(StationFindedAction(result.toList()));
   if (result.length == 1) {
     store.dispatch(CurrentStationSelectedAction(result.first));
+  } else if (result.isEmpty) {
+    store.dispatch(NetworkError('没有找到任何站点!'));
   }
 }
