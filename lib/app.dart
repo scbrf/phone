@@ -22,6 +22,7 @@ class ScbrfApp extends StatelessWidget {
         initialRoute: ScbrfRoutes.loading,
         navigatorKey: navigatorKey,
         routes: {
+          ScbrfRoutes.articles: (context) => const ArticlesScreen(),
           ScbrfRoutes.home: (context) => const HomeScreen(),
           ScbrfRoutes.loading: (context) {
             onInit() {

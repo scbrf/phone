@@ -17,6 +17,11 @@ List<Middleware<AppState>> createMiddleware() {
     logger,
     TypedMiddleware<AppState, FindStationAction>(findStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
+    TypedMiddleware<AppState, FocusPlanetSelectedAction>(
+        ((store, action, next) {
+      next(action);
+      navigatorKey.currentState!.pushNamed(ScbrfRoutes.articles);
+    })),
   ];
 }
 
@@ -42,7 +47,8 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           planets: (mapBody['planets'] as List)
               .map<Planet>((json) => Planet.fromJson(json))
               .toList(),
-          ipfsPeers: mapBody['ipfspeers']),
+          ipfsPeers: mapBody['ipfspeers'],
+          ipfsGateway: mapBody['ipfsGateway']),
     );
     navigatorKey.currentState!
         .pushNamedAndRemoveUntil(ScbrfRoutes.home, ((route) => false));

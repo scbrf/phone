@@ -6,12 +6,15 @@ class Planet {
   final String id;
   final String name;
   final List<Article> articles;
-  const Planet({this.id = '', this.name = '', this.articles = const []});
+  final String ipns;
+  const Planet(
+      {this.id = '', this.name = '', this.articles = const [], this.ipns = ''});
 
   static fromJson(Map<String, dynamic> json) {
     return Planet(
         id: json['id'],
         name: json['name'],
+        ipns: json['ipns'],
         articles: (json["articles"] as List)
             .map<Article>(
               (e) => Article.fromJson(e),

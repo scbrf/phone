@@ -3,6 +3,7 @@ import 'package:scbrf/models/models.dart';
 
 @immutable
 class AppState {
+  final String ipfsGateway;
   final LoadState state;
   final List<String> stations;
   final String currentStation;
@@ -14,6 +15,7 @@ class AppState {
   final Article focus;
   final String address;
   const AppState({
+    this.ipfsGateway = '',
     this.state = const LoadState(),
     this.ipfsPeers = 0,
     this.focusPlanet = 'unread',
@@ -28,6 +30,7 @@ class AppState {
   factory AppState.loading() =>
       const AppState(state: LoadState(isLoading: true, error: ''));
   AppState copyWith({
+    String? ipfsGateway,
     LoadState? state,
     List<String>? stations,
     String? currentStation,
@@ -43,6 +46,7 @@ class AppState {
     String? address,
   }) {
     return AppState(
+      ipfsGateway: ipfsGateway ?? this.ipfsGateway,
       state: state ?? this.state,
       stations: stations ?? this.stations,
       currentStation: currentStation ?? this.currentStation,

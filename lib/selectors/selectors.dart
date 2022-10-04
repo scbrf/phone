@@ -6,16 +6,12 @@ var log = getLogger('selectors');
 List<Article> getTodayArticles(List<FollowingPlanet> following) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
-  log.d(
-      'today is ${now.millisecondsSinceEpoch} ${now.year} ${now.month} ${now.day}');
   return following.fold<List<Article>>(
       [],
       (value, p) => [
             ...value,
             ...p.articles.where((a) {
               DateTime date = DateTime.fromMillisecondsSinceEpoch(a.created);
-              log.d(
-                  'article date is ${a.created} ${date.year} ${date.month} ${date.day}');
               return date.year == today.year &&
                   date.month == today.month &&
                   date.day == today.day;

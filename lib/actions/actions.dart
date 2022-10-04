@@ -24,8 +24,12 @@ class StationLoadedAction {
   final List<Planet> planets;
   final int ipfsPeers;
   final String address;
+  final String ipfsGateway;
   StationLoadedAction(this.address,
-      {this.following = const [], this.planets = const [], this.ipfsPeers = 0});
+      {this.following = const [],
+      this.planets = const [],
+      this.ipfsPeers = 0,
+      this.ipfsGateway = ''});
 }
 
 //也坑会遇到网络错误

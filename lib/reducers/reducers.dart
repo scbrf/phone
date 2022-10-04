@@ -34,6 +34,9 @@ final appReducer = combineReducers([
         ipfsPeers:
             TypedReducer<int, StationLoadedAction>((_, a) => a.ipfsPeers)(
                 s.ipfsPeers, a),
+        ipfsGateway:
+            TypedReducer<String, StationLoadedAction>((_, a) => a.ipfsGateway)(
+                s.ipfsGateway, a),
         draft: TypedReducer<Article, SetEditorDraftAction>((_, a) => a.draft)(
             s.draft, a),
         focus: TypedReducer<Article, FocusArticleSelectedAction>(
