@@ -49,7 +49,7 @@ Map<String, int> numberSelector(AppState a) {
   Map<String, int> ret = {};
   ret['today'] = getTodayArticles(a.following).where((a) => !a.read).length;
   ret['unread'] = getUnreadArticles(a.following).where((a) => !a.read).length;
-  ret['starred'] = getUnreadArticles(a.following).where((a) => !a.read).length;
+  ret['starred'] = getStarredArticles(a.following).where((a) => !a.read).length;
   for (int i = 0; i < a.following.length; i++) {
     ret['following:${a.following[i].id}'] =
         a.following[i].articles.where((a) => !a.read).length;
