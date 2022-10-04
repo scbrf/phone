@@ -3,7 +3,6 @@ import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/reducers/reducers.dart';
-import 'package:scbrf/selectors/selectors.dart';
 
 void main() {
   test('setloading error', () {
@@ -14,7 +13,7 @@ void main() {
 
     store.dispatch(NetworkError('error fetch'));
 
-    expect(isLoadingSelector(store.state), false);
-    expect(errorSelector(store.state), 'error fetch');
+    expect(store.state.state.isLoading, false);
+    expect(store.state.state.error, 'error fetch');
   });
 }

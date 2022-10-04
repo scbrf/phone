@@ -1,20 +1,25 @@
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/utils/logger.dart';
+
+final log = getLogger('reducers');
 
 final appReducer = combineReducers([
   //基本的设置逻辑
   (AppState s, a) => s.copyWith(
-        isLoading: combineReducers([
-          TypedReducer<bool, FindStationAction>((_, a) => true),
-          TypedReducer<bool, LoadStationAction>((_, a) => true),
-          TypedReducer<bool, NetworkError>((_, a) => false),
-        ])(s.isLoading, a),
-        error: combineReducers([
-          TypedReducer<String, NetworkError>((_, a) => a.error),
-          TypedReducer<String, FindStationAction>((_, a) => ''),
-          TypedReducer<String, LoadStationAction>((_, a) => ''),
-        ])(s.error, a),
+        state: combineReducers([
+          TypedReducer<LoadState, FindStationAction>((_, a) {
+            log.d(
+                'reducer called to set load State with action FindStationAction');
+            return const LoadState(
+                isLoading: true, progress: '正在查找运行点...', error: '');
+          }),
+          TypedReducer<LoadState, LoadStationAction>((_, a) => const LoadState(
+              isLoading: true, progress: '正在加载数据...', error: '')),
+          TypedReducer<LoadState, NetworkError>(
+              (_, a) => LoadState(isLoading: false, error: a.error)),
+        ])(s.state, a),
         stations: TypedReducer<List<String>, StationFindedAction>(
             (_, a) => a.stations)(s.stations, a),
         currentStation: TypedReducer<String, CurrentStationSelectedAction>(

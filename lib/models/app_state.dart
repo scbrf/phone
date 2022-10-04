@@ -3,8 +3,7 @@ import 'package:scbrf/models/models.dart';
 
 @immutable
 class AppState {
-  final bool isLoading;
-  final String error;
+  final LoadState state;
   final List<String> stations;
   final String currentStation;
   final List<FollowingPlanet> following;
@@ -15,8 +14,7 @@ class AppState {
   final Article focus;
   final String address;
   const AppState({
-    this.isLoading = false,
-    this.error = '',
+    this.state = const LoadState(),
     this.ipfsPeers = 0,
     this.focusPlanet = 'unread',
     this.following = const [],
@@ -27,10 +25,10 @@ class AppState {
     this.draft = const Article(),
     this.focus = const Article(),
   });
-  factory AppState.loading() => const AppState(isLoading: true);
+  factory AppState.loading() =>
+      const AppState(state: LoadState(isLoading: true, error: ''));
   AppState copyWith({
-    bool? isLoading,
-    String? error,
+    LoadState? state,
     List<String>? stations,
     String? currentStation,
     List<FollowingPlanet>? following,
@@ -45,8 +43,7 @@ class AppState {
     String? address,
   }) {
     return AppState(
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      state: state ?? this.state,
       stations: stations ?? this.stations,
       currentStation: currentStation ?? this.currentStation,
       following: following ?? this.following,
@@ -57,5 +54,10 @@ class AppState {
       focus: focus ?? this.focus,
       address: address ?? this.address,
     );
+  }
+
+  @override
+  String toString() {
+    return 'AppState{ state:$state }';
   }
 }

@@ -86,6 +86,3 @@ Articles articlesSelector(AppState s) {
   }
   return Articles(title: articlesTitle, articles: articles);
 }
-
-bool isLoadingSelector(AppState state) => state.isLoading;
-String errorSelector(AppState state) => state.error;
