@@ -19,6 +19,7 @@ class Article {
         created: json['created'],
         read: json['read'] ?? false,
         title: json['title'] ?? '',
+        url: json['url'] ?? '',
         starred: json['starred'] ?? false);
   }
 }

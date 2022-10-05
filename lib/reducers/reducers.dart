@@ -17,6 +17,8 @@ final appReducer = combineReducers([
           }),
           TypedReducer<LoadState, LoadStationAction>((_, a) => const LoadState(
               isLoading: true, progress: '正在加载数据...', error: '')),
+          TypedReducer<LoadState, StationFindedAction>((_, a) =>
+              const LoadState(isLoading: false, progress: '', error: '')),
           TypedReducer<LoadState, NetworkError>(
               (_, a) => LoadState(isLoading: false, error: a.error)),
         ])(s.state, a),

@@ -19,21 +19,16 @@ class ScbrfApp extends StatelessWidget {
     return StoreProvider(
       store: store,
       child: MaterialApp(
-        initialRoute: ScbrfRoutes.loading,
         navigatorKey: navigatorKey,
         routes: {
+          ScbrfRoutes.scan: (context) => const QrScanScreen(),
           ScbrfRoutes.webiew: (context) => const WebviewScreen(),
           ScbrfRoutes.articles: (context) => const ArticlesScreen(),
-          ScbrfRoutes.home: (context) => const HomeScreen(),
-          ScbrfRoutes.loading: (context) {
-            onInit() {
-              StoreProvider.of<AppState>(context).dispatch(FindStationAction());
-            }
-
-            return LoadingScreen(
-              onInit,
-            );
-          },
+          ScbrfRoutes.root: (context) => const HomeScreen(),
+          ScbrfRoutes.home: (context) => LoadingScreen(() {
+                StoreProvider.of<AppState>(context)
+                    .dispatch(FindStationAction());
+              }),
         },
       ),
     );

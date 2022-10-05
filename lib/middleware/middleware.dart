@@ -8,6 +8,7 @@ import 'package:scbrf/router.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:http/http.dart' as http;
+// import 'package:nsd/nsd.dart';
 
 final log = getLogger('middleware');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -39,6 +40,7 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
   next(action);
   var client = http.Client();
   try {
+    log.d('try to load station from ${store.state.currentStation}');
     var response = await client
         .post(Uri.http(store.state.currentStation, '/site'), body: {});
     String body = utf8.decode(response.bodyBytes);
@@ -56,7 +58,7 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           ipfsGateway: mapBody['ipfsGateway']),
     );
     navigatorKey.currentState!
-        .pushNamedAndRemoveUntil(ScbrfRoutes.home, ((route) => false));
+        .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
   } finally {
     client.close();
   }
@@ -64,22 +66,21 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
 
 findStation(Store<AppState> store, action, NextDispatcher next) async {
   next(action);
-  const String name = '_api._scarborough._tcp.local';
+  const String name = '_scarborough-api._tcp';
+  List<String> serverEntry = [];
+
   final MDnsClient client = MDnsClient();
   await client.start();
-
-  List<String> serverEntry = [];
   await for (final SrvResourceRecord ptr
       in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(name))) {
     serverEntry.add("${ptr.target}:${ptr.port}");
   }
   client.stop();
+
   Set<String> result = serverEntry.toSet();
   log.d("service find done! $result");
   store.dispatch(StationFindedAction(result.toList()));
   if (result.length == 1) {
     store.dispatch(CurrentStationSelectedAction(result.first));
-  } else if (result.isEmpty) {
-    store.dispatch(NetworkError('没有找到任何站点!'));
   }
 }
