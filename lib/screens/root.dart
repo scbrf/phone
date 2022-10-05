@@ -73,9 +73,9 @@ class HomeScreenState extends State<HomeScreen> {
                           .dispatch(FocusPlanetSelectedAction("my:${e.id}"));
                     },
                     leading: CircleAvatar(
-                        // onBackgroundImageError: (exception, stackTrace) => {},
-                        // backgroundImage: NetworkImage(
-                        //     "${state.ipfsGateway}/ipns/${e.ipns}/avatar.png"),
+                        onBackgroundImageError: (exception, stackTrace) => {},
+                        backgroundImage: NetworkImage(
+                            "${state.ipfsGateway}/ipns/${e.ipns}/avatar.png"),
                         child: Text(e.name.substring(0, 1).toUpperCase())),
                     title: Text(e.name),
                   ),

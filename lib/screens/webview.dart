@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -19,6 +18,7 @@ class WebviewScreen extends StatefulWidget {
 
 class WebviewScreenState extends State<WebviewScreen> {
   WebViewController? controller;
+  bool loading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -79,28 +79,42 @@ class WebviewScreenState extends State<WebviewScreen> {
         builder: (ctx, article) {
           log.d('rebuild webview and load from ${article.url}');
           return Scaffold(
-            appBar: AppBar(
-              title: Text(article.title),
-            ),
-            body: WebView(
-              initialUrl: article.url,
-              onWebViewCreated: (c) {
-                controller = c;
-              },
-              javascriptChannels: <JavascriptChannel>{
-                JavascriptChannel(
-                  name: 'ipc',
-                  onMessageReceived: (JavascriptMessage message) async {
-                    log.d('receive from web ${message.message}');
-                    runWebInvoke(message.message);
+            body: SafeArea(
+                child: Stack(
+              children: [
+                WebView(
+                  initialUrl: article.url,
+                  onWebViewCreated: (c) {
+                    controller = c;
                   },
-                )
-              },
-              userAgent: 'Planet/MobileJS',
-              debuggingEnabled: true,
-              onPageStarted: injectEthereum,
-              javascriptMode: JavascriptMode.unrestricted,
-            ),
+                  javascriptChannels: <JavascriptChannel>{
+                    JavascriptChannel(
+                      name: 'ipc',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        log.d('receive from web ${message.message}');
+                        runWebInvoke(message.message);
+                      },
+                    )
+                  },
+                  userAgent: 'Planet/MobileJS',
+                  debuggingEnabled: true,
+                  onPageStarted: injectEthereum,
+                  onPageFinished: ((url) {
+                    setState(() {
+                      loading = false;
+                    });
+                  }),
+                  javascriptMode: JavascriptMode.unrestricted,
+                ),
+                ...loading
+                    ? [
+                        const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      ]
+                    : [],
+              ],
+            )),
           );
         });
   }
