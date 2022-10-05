@@ -28,6 +28,7 @@ class WebviewScreenState extends State<WebviewScreen> {
       controller!.runJavascript("""(()=>{
   let resolves={}
   window.ethereum = {
+      address: '$address',
       isScarborough: true,
       isMobile: true,
       on(msg, cb) {
