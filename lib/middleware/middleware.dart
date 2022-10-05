@@ -8,6 +8,7 @@ import 'package:scbrf/router.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:nsd/nsd.dart';
 
 final log = getLogger('middleware');
@@ -17,6 +18,7 @@ List<Middleware<AppState>> createMiddleware() {
   return [
     logger,
     TypedMiddleware<AppState, FindStationAction>(findStation),
+    TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
@@ -34,6 +36,18 @@ List<Middleware<AppState>> createMiddleware() {
 logger(Store<AppState> store, action, NextDispatcher next) {
   next(action);
   log.d("action: $action appstate: ${store.state}");
+}
+
+saveLastStation(Store<AppState> store, CurrentStationSelectedAction action,
+    NextDispatcher next) async {
+  next(action);
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('last_station', action.currentStation);
+}
+
+Future<String?> loadLastStation() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('last_station');
 }
 
 loadStation(Store<AppState> store, action, NextDispatcher next) async {

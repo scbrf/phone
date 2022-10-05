@@ -26,8 +26,15 @@ class ScbrfApp extends StatelessWidget {
           ScbrfRoutes.articles: (context) => const ArticlesScreen(),
           ScbrfRoutes.root: (context) => const HomeScreen(),
           ScbrfRoutes.home: (context) => LoadingScreen(() {
-                StoreProvider.of<AppState>(context)
-                    .dispatch(FindStationAction());
+                loadLastStation().then((value) {
+                  if (value != null && value.isNotEmpty) {
+                    StoreProvider.of<AppState>(context)
+                        .dispatch(CurrentStationSelectedAction(value));
+                  } else {
+                    StoreProvider.of<AppState>(context)
+                        .dispatch(FindStationAction());
+                  }
+                });
               }),
         },
       ),
