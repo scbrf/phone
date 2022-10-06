@@ -7,18 +7,24 @@ class Planet {
   final String name;
   final List<Article> articles;
   final String ipns;
+  final String avatar;
   const Planet(
-      {this.id = '', this.name = '', this.articles = const [], this.ipns = ''});
+      {this.id = '',
+      this.name = '',
+      this.articles = const [],
+      this.ipns = '',
+      this.avatar = ''});
 
   static fromJson(Map<String, dynamic> json) {
     return Planet(
-        id: json['id'],
-        name: json['name'],
-        ipns: json['ipns'],
-        articles: (json["articles"] as List)
-            .map<Article>(
-              (e) => Article.fromJson(e),
-            )
-            .toList());
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        ipns: json['ipns'] ?? '',
+        avatar: json['avatar'] ?? '',
+        articles: (json["articles"] as List).map<Article>(
+          (e) {
+            return Article.fromJson(e).copyWith(planetid: json['id']);
+          },
+        ).toList());
   }
 }

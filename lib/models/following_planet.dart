@@ -7,18 +7,38 @@ class FollowingPlanet {
   final String name;
   final List<Article> articles;
   final String cid;
+  final String avatar;
   const FollowingPlanet(
-      {this.id = '', this.name = '', this.articles = const [], this.cid = ''});
+      {this.id = '',
+      this.name = '',
+      this.articles = const [],
+      this.cid = '',
+      this.avatar = ''});
 
   static fromJson(Map<String, dynamic> json) {
     return FollowingPlanet(
-        id: json['id'],
-        name: json['name'],
-        cid: json['cid'],
-        articles: (json["articles"] as List)
-            .map<Article>(
-              (e) => Article.fromJson(e),
-            )
-            .toList());
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        cid: json['cid'] ?? '',
+        avatar: json['avatar'] ?? '',
+        articles: (json["articles"] as List).map<Article>(
+          (e) {
+            return Article.fromJson(e).copyWith(planetid: json['id']);
+          },
+        ).toList());
+  }
+
+  FollowingPlanet copyWith(
+      {String? id,
+      String? name,
+      List<Article>? articles,
+      String? cid,
+      String? avatar}) {
+    return FollowingPlanet(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        articles: articles ?? this.articles,
+        cid: cid ?? this.cid,
+        avatar: avatar ?? this.avatar);
   }
 }

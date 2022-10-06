@@ -25,6 +25,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         distinct: true,
         converter: (Store<AppState> store) => articlesSelector(store.state),
         builder: (ctx, articles) {
+          log.d('building articles screen');
           return Scaffold(
             appBar: AppBar(
               title: Text(articles.title),
@@ -34,7 +35,16 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                 context: context,
                 tiles: articles.articles
                     .map<ListTile>((e) => ListTile(
-                          leading: const Icon(Icons.abc),
+                          leading: !e.read && !e.editable
+                              ? Container(
+                                  decoration: const BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  width: 10,
+                                  height: 10,
+                                )
+                              : const Icon(Icons.abc),
                           isThreeLine: true,
                           title: Padding(
                             padding: const EdgeInsets.only(bottom: 5),
@@ -44,7 +54,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                             ),
                           ),
                           contentPadding:
-                              const EdgeInsets.fromLTRB(10, 3, 10, 3),
+                              const EdgeInsets.fromLTRB(20, 3, 10, 3),
                           minLeadingWidth: 20,
                           subtitle: Column(
                             mainAxisSize: MainAxisSize.min,

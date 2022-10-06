@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -83,6 +84,7 @@ class WebviewScreenState extends State<WebviewScreen> {
                 child: Stack(
               children: [
                 WebView(
+                  key: const ValueKey('webview'),
                   initialUrl: article.url,
                   onWebViewCreated: (c) {
                     controller = c;
@@ -98,12 +100,22 @@ class WebviewScreenState extends State<WebviewScreen> {
                   },
                   userAgent: 'Planet/MobileJS',
                   debuggingEnabled: true,
+                  onProgress: (progress) {
+                    log.d('loading webpage $progress');
+                    if (progress >= 100) {
+                      setState(() {
+                        loading = false;
+                      });
+                    }
+                  },
                   onPageStarted: injectEthereum,
-                  onPageFinished: ((url) {
-                    setState(() {
-                      loading = false;
-                    });
-                  }),
+                  onPageFinished: (url) {
+                    if (!article.read && !article.editable) {
+                      StoreProvider.of<AppState>(context).dispatch(
+                          MarkArticleReadedAction(
+                              article.planetid, article.id));
+                    }
+                  },
                   javascriptMode: JavascriptMode.unrestricted,
                 ),
                 ...loading

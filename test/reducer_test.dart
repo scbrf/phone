@@ -16,4 +16,15 @@ void main() {
     expect(store.state.state.isLoading, false);
     expect(store.state.state.error, 'error fetch');
   });
+
+  test('markread', () {
+    final store = Store<AppState>(
+      appReducer,
+      initialState: const AppState(following: [
+        FollowingPlanet(id: "p1", articles: [Article(id: "a1", read: false)])
+      ]),
+    );
+    store.dispatch(MarkArticleReadedSuccAction('p1', 'a1'));
+    expect(store.state.following[0].articles[0].read, true);
+  });
 }

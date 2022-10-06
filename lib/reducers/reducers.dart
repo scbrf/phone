@@ -6,6 +6,20 @@ import 'package:scbrf/utils/logger.dart';
 final log = getLogger('reducers');
 
 final appReducer = combineReducers([
+  (AppState s, action) {
+    if (action is MarkArticleReadedSuccAction) {
+      return s.copyWith(
+          following: s.following.map((p) {
+        if (p.id != action.planetid) return p;
+        return p.copyWith(
+            articles: p.articles.map((a) {
+          if (a.id != action.articleid) return a;
+          return a.copyWith(read: true);
+        }).toList());
+      }).toList());
+    }
+    return s;
+  },
   //基本的设置逻辑
   (AppState s, a) => s.copyWith(
         state: combineReducers([

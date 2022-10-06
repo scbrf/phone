@@ -15,6 +15,18 @@ class CurrentStationSelectedAction {
   CurrentStationSelectedAction(this.currentStation);
 }
 
+class MarkArticleReadedAction {
+  final String articleid;
+  final String planetid;
+  MarkArticleReadedAction(this.planetid, this.articleid);
+}
+
+class MarkArticleReadedSuccAction {
+  final String articleid;
+  final String planetid;
+  MarkArticleReadedSuccAction(this.planetid, this.articleid);
+}
+
 //发起一个LoadStation的Action
 class LoadStationAction {}
 

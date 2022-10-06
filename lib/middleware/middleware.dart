@@ -20,17 +20,46 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, FindStationAction>(findStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
+    TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
       next(action);
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.articles);
     })),
     TypedMiddleware<AppState, FocusArticleSelectedAction>(
-        ((store, action, next) {
+        ((store, action, next) async {
       next(action);
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.webiew);
     })),
   ];
+}
+
+checkAndMarkReaded(Store<AppState> store, MarkArticleReadedAction action,
+    NextDispatcher next) async {
+  next(action);
+  //mark as readed
+  var client = http.Client();
+  try {
+    log.d('try to mark article readed ${action.planetid} ${action.articleid}');
+    var response = await client.post(
+        Uri.http(store.state.currentStation, '/article/markreaded'),
+        body: {
+          "planetid": action.planetid,
+          "articleid": action.articleid,
+        });
+    String body = utf8.decode(response.bodyBytes);
+    log.d('markreaded got $body');
+    var mapBody = jsonDecode(body) as Map;
+    if ((mapBody['result'] as String).isEmpty) {
+      log.d('mark read succ!');
+      store.dispatch(
+          MarkArticleReadedSuccAction(action.planetid, action.articleid));
+    } else {
+      log.d('mark read error, reason: ${mapBody['result']} !');
+    }
+  } finally {
+    client.close();
+  }
 }
 
 logger(Store<AppState> store, action, NextDispatcher next) {
