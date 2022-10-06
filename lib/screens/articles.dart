@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
+import 'package:scbrf/components/float_play_btn.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
+import 'package:scbrf/utils/logger.dart';
 
 class ArticlesScreen extends StatefulWidget {
   const ArticlesScreen({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ formatDate(timestamp) {
 }
 
 class ArticlesScreenState extends State<ArticlesScreen> {
+  var log = getLogger('ArticlesScreenState');
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, Articles>(
@@ -30,6 +33,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             appBar: AppBar(
               title: Text(articles.title),
             ),
+            floatingActionButton: const FloatPlayBtn(),
             body: ListView(
               children: ListTile.divideTiles(
                 context: context,

@@ -4,6 +4,7 @@ import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
+import 'package:scbrf/components/float_play_btn.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
 
@@ -25,6 +26,7 @@ class HomeScreenState extends State<HomeScreen> {
             appBar: AppBar(
               title: const Text('Scarborough'),
             ),
+            floatingActionButton: const FloatPlayBtn(),
             body: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

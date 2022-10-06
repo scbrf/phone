@@ -2,22 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/page_manager.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/screens/screen.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/middleware/middleware.dart';
 
-class ScbrfApp extends StatelessWidget {
-  final Store<AppState> store;
+import 'services/service_locator.dart';
 
+class ScbrfApp extends StatefulWidget {
+  final Store<AppState> store;
   const ScbrfApp(
     this.store, {
     Key? key,
   }) : super(key: key);
   @override
+  State<StatefulWidget> createState() => _AppState();
+}
+
+class _AppState extends State<ScbrfApp> {
+  @override
+  void initState() {
+    super.initState();
+    getIt<PageManager>().init();
+  }
+
+  @override
+  void dispose() {
+    getIt<PageManager>().dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StoreProvider(
-      store: store,
+      store: widget.store,
       child: MaterialApp(
         navigatorKey: navigatorKey,
         routes: {

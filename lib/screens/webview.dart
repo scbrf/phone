@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
+import 'package:scbrf/components/float_play_btn.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/notifiers/play_button_notifier.dart';
+import 'package:scbrf/page_manager.dart';
+import 'package:scbrf/services/service_locator.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -80,15 +84,7 @@ class WebviewScreenState extends State<WebviewScreen> {
         builder: (ctx, article) {
           log.d('rebuild webview and load from ${article.url}');
           return Scaffold(
-            floatingActionButton: article.audioFilename.isEmpty
-                ? null
-                : FloatingActionButton(
-                    onPressed: () {
-                      // Add your onPressed code here!
-                    },
-                    backgroundColor: Colors.green,
-                    child: const Icon(Icons.navigation),
-                  ),
+            floatingActionButton: const FloatPlayBtn(),
             body: SafeArea(
                 child: Stack(
               children: [
