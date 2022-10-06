@@ -80,6 +80,15 @@ class WebviewScreenState extends State<WebviewScreen> {
         builder: (ctx, article) {
           log.d('rebuild webview and load from ${article.url}');
           return Scaffold(
+            floatingActionButton: article.audioFilename.isEmpty
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    backgroundColor: Colors.green,
+                    child: const Icon(Icons.navigation),
+                  ),
             body: SafeArea(
                 child: Stack(
               children: [
