@@ -24,46 +24,49 @@ class LoadingScreenState extends State<LoadingScreen> {
       distinct: true,
       converter: (Store<AppState> store) => store.state.state,
       builder: (ctx, state) {
-        return state.isLoading
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-                      child: const CircularProgressIndicator(),
+        return Scaffold(
+          body: state.isLoading
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                        child: const CircularProgressIndicator(),
+                      ),
+                      Text(
+                        state.progress,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                )
+              : state.error.isNotEmpty
+                  ? Center(
+                      child: Text(
+                      state.error,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ))
+                  : Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('没有找到任何站点',
+                              style: Theme.of(context).textTheme.labelMedium),
+                          Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed(ScbrfRoutes.scan);
+                              },
+                              child: const Text('扫码'),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                    Text(
-                      state.progress,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              )
-            : state.error.isNotEmpty
-                ? Center(
-                    child: Text(
-                    state.error,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ))
-                : Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('没有找到任何站点',
-                            style: Theme.of(context).textTheme.labelMedium),
-                        Container(
-                          margin: const EdgeInsets.only(top: 20),
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(ScbrfRoutes.scan);
-                            },
-                            child: const Text('扫码'),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
+        );
       },
     );
   }
