@@ -15,6 +15,9 @@ class CurrentStationSelectedAction {
   CurrentStationSelectedAction(this.currentStation);
 }
 
+//刷新当前的Station
+class RefreshStationAction {}
+
 class MarkArticleReadedAction {
   final String articleid;
   final String planetid;

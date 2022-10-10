@@ -5,6 +5,7 @@ import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
+import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,8 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, FindStationAction>(findStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
+    TypedMiddleware<AppState, RefreshStationAction>(loadStation),
+    TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
@@ -38,27 +41,16 @@ checkAndMarkReaded(Store<AppState> store, MarkArticleReadedAction action,
     NextDispatcher next) async {
   next(action);
   //mark as readed
-  var client = http.Client();
-  try {
-    log.d('try to mark article readed ${action.planetid} ${action.articleid}');
-    var response = await client.post(
-        Uri.http(store.state.currentStation, '/article/markreaded'),
-        body: {
-          "planetid": action.planetid,
-          "articleid": action.articleid,
-        });
-    String body = utf8.decode(response.bodyBytes);
-    log.d('markreaded got $body');
-    var mapBody = jsonDecode(body) as Map;
-    if ((mapBody['result'] as String).isEmpty) {
-      log.d('mark read succ!');
-      store.dispatch(
-          MarkArticleReadedSuccAction(action.planetid, action.articleid));
-    } else {
-      log.d('mark read error, reason: ${mapBody['result']} !');
-    }
-  } finally {
-    client.close();
+  var rsp = await api('/article/markreaded', {
+    "planetid": action.planetid,
+    "articleid": action.articleid,
+  });
+  if ((rsp['error'] as String).isEmpty) {
+    log.d('mark read succ!');
+    store.dispatch(
+        MarkArticleReadedSuccAction(action.planetid, action.articleid));
+  } else {
+    log.d('mark read error, reason: ${rsp['error']} !');
   }
 }
 
@@ -72,6 +64,12 @@ saveLastStation(Store<AppState> store, CurrentStationSelectedAction action,
   next(action);
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('last_station', action.currentStation);
+}
+
+setApiEntry(Store<AppState> store, CurrentStationSelectedAction action,
+    NextDispatcher next) async {
+  next(action);
+  apiEntry = action.currentStation;
 }
 
 Future<String?> loadLastStation() async {

@@ -3,6 +3,7 @@ import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
+import 'package:scbrf/components/create_planet_dialog.dart';
 import 'package:scbrf/components/float_play_btn.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
@@ -23,7 +24,37 @@ class HomeScreenState extends State<HomeScreen> {
         builder: (ctx, state) {
           return Scaffold(
               appBar: AppBar(
+                centerTitle: false,
                 title: const Text('Scarborough'),
+                actions: [
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx2) => CreatePlanetDialog(() {
+                              Navigator.of(ctx2).pop();
+                              StoreProvider.of<AppState>(context)
+                                  .dispatch(RefreshStationAction());
+                            }),
+                          );
+                        },
+                        child: const Icon(
+                          Icons.add,
+                          size: 26.0,
+                        ),
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: const Icon(
+                          Icons.group_add,
+                          size: 26.0,
+                        ),
+                      )),
+                ],
               ),
               floatingActionButton: const FloatPlayBtn(),
               body: Column(
