@@ -80,5 +80,6 @@ Articles articlesSelector(AppState s) {
     articlesTitle = p.name;
     articles = p.articles;
   }
-  return Articles(title: articlesTitle, articles: articles);
+  return Articles(
+      title: articlesTitle, focusPlanetId: s.focusPlanet, articles: articles);
 }

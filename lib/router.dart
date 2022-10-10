@@ -4,4 +4,5 @@ class ScbrfRoutes {
   static const articles = "/articles";
   static const webiew = "/webview";
   static const scan = "/scan";
+  static const draft = "/draft";
 }

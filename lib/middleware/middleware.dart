@@ -1,6 +1,8 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
@@ -10,6 +12,7 @@ import 'package:scbrf/utils/logger.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 // import 'package:nsd/nsd.dart';
 
 final log = getLogger('middleware');
@@ -24,6 +27,9 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, RefreshStationAction>(loadStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
+    TypedMiddleware<AppState, SetEditorDraftAction>(_saveDraft),
+    TypedMiddleware<AppState, DraftTitleChangeAction>(_saveDraft),
+    TypedMiddleware<AppState, DraftContentChangeAction>(_saveDraft),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
       next(action);
@@ -35,6 +41,25 @@ List<Middleware<AppState>> createMiddleware() {
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.webiew);
     })),
   ];
+}
+
+_saveDraft(Store<AppState> store, action, NextDispatcher next) async {
+  next(action);
+  if (store.state.draft.id.isEmpty) {
+    var uuid = const Uuid();
+    String id = uuid.v4().toUpperCase();
+    store.dispatch(SetEditorDraftAction(store.state.draft.copyWith(id: id)));
+  }
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String appDocPath = appDocDir.path;
+  String draftPath = path.join(appDocPath, 'Drafts', store.state.draft.id);
+  Directory draftDir = Directory(draftPath);
+  if (!draftDir.existsSync()) {
+    await draftDir.create(recursive: true);
+  }
+  String draftFilePath = path.join(draftPath, 'draft.json');
+  File draftFile = File(draftFilePath);
+  await draftFile.writeAsString(jsonEncode(store.state.draft.toJson()));
 }
 
 checkAndMarkReaded(Store<AppState> store, MarkArticleReadedAction action,

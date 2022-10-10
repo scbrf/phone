@@ -3,8 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
-import 'package:scbrf/components/float_play_btn.dart';
+import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
 import 'package:scbrf/utils/logger.dart';
 
@@ -31,7 +32,24 @@ class ArticlesScreenState extends State<ArticlesScreen> {
           log.d('building articles screen');
           return Scaffold(
             appBar: AppBar(
+              centerTitle: false,
               title: Text(articles.title),
+              actions: articles.focusPlanetId.startsWith('my:')
+                  ? <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.only(right: 20.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pushNamed(ScbrfRoutes.draft);
+                            },
+                            child: const Icon(
+                              Icons.note_alt_outlined,
+                              size: 26.0,
+                            ),
+                          )),
+                    ]
+                  : <Widget>[],
             ),
             floatingActionButton: const FloatPlayBtn(),
             body: ListView(

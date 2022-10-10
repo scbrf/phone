@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
-import 'package:scbrf/models/app_state.dart';
+import 'package:scbrf/models/AppState.dart';
 import 'package:scbrf/models/article.dart';
 import 'package:scbrf/notifiers/play_button_notifier.dart';
-import 'package:scbrf/page_manager.dart';
+import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/services/service_locator.dart';
 import 'package:scbrf/utils/logger.dart';
 

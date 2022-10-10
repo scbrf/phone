@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/models/models.dart';
-import 'package:scbrf/page_manager.dart';
+import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/screens/screen.dart';
 import 'package:scbrf/actions/actions.dart';
@@ -44,6 +44,8 @@ class _AppState extends State<ScbrfApp> {
           ScbrfRoutes.webiew: (context) => const WebviewScreen(),
           ScbrfRoutes.articles: (context) => const ArticlesScreen(),
           ScbrfRoutes.root: (context) => const HomeScreen(),
+          ScbrfRoutes.draft: (context) => DraftScreen(
+              widget.store.state.draft.title, widget.store.state.draft.content),
           ScbrfRoutes.home: (context) => LoadingScreen(() {
                 loadLastStation().then((value) {
                   if (value != null && value.isNotEmpty) {

@@ -1,6 +1,6 @@
 export 'article.dart';
-export 'app_state.dart';
+export 'AppState.dart';
 export 'planet.dart';
-export 'following_planet.dart';
+export 'FollowingPlanet.dart';
 export 'articles.dart';
-export 'load_state.dart';
+export 'LoadState.dart';

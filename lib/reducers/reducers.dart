@@ -53,8 +53,13 @@ final appReducer = combineReducers([
         ipfsGateway:
             TypedReducer<String, StationLoadedAction>((_, a) => a.ipfsGateway)(
                 s.ipfsGateway, a),
-        draft: TypedReducer<Article, SetEditorDraftAction>((_, a) => a.draft)(
-            s.draft, a),
+        draft: combineReducers([
+          TypedReducer<Article, SetEditorDraftAction>((_, a) => a.draft),
+          TypedReducer<Article, DraftTitleChangeAction>(
+              (s, a) => s.copyWith(title: a.value)),
+          TypedReducer<Article, DraftContentChangeAction>(
+              (s, a) => s.copyWith(content: a.value))
+        ])(s.draft, a),
         focus: TypedReducer<Article, FocusArticleSelectedAction>(
             (_, a) => a.focus)(s.draft, a),
         address: TypedReducer<String, StationLoadedAction>((_, a) => a.address)(

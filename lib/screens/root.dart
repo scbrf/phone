@@ -3,9 +3,9 @@ import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
-import 'package:scbrf/components/create_planet_dialog.dart';
-import 'package:scbrf/components/float_play_btn.dart';
-import 'package:scbrf/components/following_planet_dialog.dart';
+import 'package:scbrf/components/CreatePlanetDialog.dart';
+import 'package:scbrf/components/FloatPlayBtn.dart';
+import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
 
