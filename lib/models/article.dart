@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 
 @immutable
 class Article {
@@ -59,6 +62,16 @@ class Article {
       "videoFilename": videoFilename,
       "attachments": attachments
     };
+  }
+
+  static Future<String> getDraftRoot() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    return path.join(appDocPath, 'Drafts');
+  }
+
+  Future<String> getDraftDir() async {
+    return path.join(await Article.getDraftRoot(), id);
   }
 
   Article copyWith({

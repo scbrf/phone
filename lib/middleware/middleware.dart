@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
@@ -13,7 +11,7 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-// import 'package:nsd/nsd.dart';
+import 'package:path/path.dart' as path;
 
 final log = getLogger('middleware');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -47,10 +45,7 @@ List<Middleware<AppState>> createMiddleware() {
 _loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
   next(action);
 
-  Directory appDocDir = await getApplicationDocumentsDirectory();
-  String appDocPath = appDocDir.path;
-  String draftRootPath = path.join(appDocPath, 'Drafts');
-  Directory draftRootDir = Directory(draftRootPath);
+  Directory draftRootDir = Directory(await Article.getDraftRoot());
   if (!await draftRootDir.exists()) {
     await draftRootDir.create();
   }
@@ -67,7 +62,6 @@ _loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
       }
     }
   }
-  log.d('load draft content is ${draft.content}');
   store.dispatch(SetEditorDraftAction(draft));
   navigatorKey.currentState!.pushNamed(ScbrfRoutes.draft);
 }
@@ -79,14 +73,12 @@ _saveDraft(Store<AppState> store, action, NextDispatcher next) async {
     String id = uuid.v4().toUpperCase();
     store.dispatch(SetEditorDraftAction(store.state.draft.copyWith(id: id)));
   }
-  Directory appDocDir = await getApplicationDocumentsDirectory();
-  String appDocPath = appDocDir.path;
-  String draftPath = path.join(appDocPath, 'Drafts', store.state.draft.id);
+
+  String draftPath = await store.state.draft.getDraftDir();
   Directory draftDir = Directory(draftPath);
   if (!draftDir.existsSync()) {
     await draftDir.create(recursive: true);
   }
-  log.d("save draft content is ${store.state.draft.content}");
   String draftFilePath = path.join(draftPath, 'draft.json');
   File draftFile = File(draftFilePath);
   await draftFile.writeAsString(jsonEncode(store.state.draft.toJson()));
