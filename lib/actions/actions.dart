@@ -24,6 +24,11 @@ class MarkArticleReadedAction {
   MarkArticleReadedAction(this.planetid, this.articleid);
 }
 
+class NewDraftAction {
+  final String planetid;
+  NewDraftAction(this.planetid);
+}
+
 class DraftTitleChangeAction {
   final String value;
   DraftTitleChangeAction(this.value);

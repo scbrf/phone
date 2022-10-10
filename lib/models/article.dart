@@ -42,7 +42,9 @@ class Article {
         summary: json['summary'] ?? '',
         content: json['content'] ?? '',
         editable: json['editable'] ?? false,
-        attachments: json['attachments'] ?? const [],
+        attachments: json['attachments'] == null
+            ? const []
+            : List<String>.from(json['attachments']),
         starred: json['starred'] ?? false);
   }
 

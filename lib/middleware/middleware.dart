@@ -30,6 +30,7 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, SetEditorDraftAction>(_saveDraft),
     TypedMiddleware<AppState, DraftTitleChangeAction>(_saveDraft),
     TypedMiddleware<AppState, DraftContentChangeAction>(_saveDraft),
+    TypedMiddleware<AppState, NewDraftAction>(_loadDraftAndRoute),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
       next(action);
@@ -41,6 +42,34 @@ List<Middleware<AppState>> createMiddleware() {
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.webiew);
     })),
   ];
+}
+
+_loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
+  next(action);
+
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String appDocPath = appDocDir.path;
+  String draftRootPath = path.join(appDocPath, 'Drafts');
+  Directory draftRootDir = Directory(draftRootPath);
+  if (!await draftRootDir.exists()) {
+    await draftRootDir.create();
+  }
+  var stream = draftRootDir.list(recursive: false, followLinks: false);
+  var draft = Article(planetid: action.planetid);
+  await for (final d in stream) {
+    String draftFilePath = path.join(d.path, 'draft.json');
+    var draftFile = File(draftFilePath);
+    if (await draftFile.exists()) {
+      Article dd = Article.fromJson(jsonDecode(await draftFile.readAsString()));
+      if (draft.planetid == action.planetid) {
+        draft = dd;
+        break;
+      }
+    }
+  }
+  log.d('load draft content is ${draft.content}');
+  store.dispatch(SetEditorDraftAction(draft));
+  navigatorKey.currentState!.pushNamed(ScbrfRoutes.draft);
 }
 
 _saveDraft(Store<AppState> store, action, NextDispatcher next) async {
@@ -57,6 +86,7 @@ _saveDraft(Store<AppState> store, action, NextDispatcher next) async {
   if (!draftDir.existsSync()) {
     await draftDir.create(recursive: true);
   }
+  log.d("save draft content is ${store.state.draft.content}");
   String draftFilePath = path.join(draftPath, 'draft.json');
   File draftFile = File(draftFilePath);
   await draftFile.writeAsString(jsonEncode(store.state.draft.toJson()));

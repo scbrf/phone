@@ -39,9 +39,9 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                       Padding(
                           padding: const EdgeInsets.only(right: 20.0),
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(ScbrfRoutes.draft);
+                            onTap: () async {
+                              StoreProvider.of<AppState>(context).dispatch(
+                                  NewDraftAction(articles.focusPlanetId));
                             },
                             child: const Icon(
                               Icons.note_alt_outlined,

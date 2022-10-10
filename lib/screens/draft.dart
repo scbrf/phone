@@ -3,6 +3,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/utils/logger.dart';
 
 class DraftScreen extends StatefulWidget {
   final String title;
@@ -15,11 +16,13 @@ class DraftScreen extends StatefulWidget {
 class _DraftScreenState extends State<DraftScreen> {
   var titleController = TextEditingController();
   var contentController = TextEditingController();
+  var log = getLogger('draft screen state');
   @override
   void initState() {
     super.initState();
     titleController.text = widget.title;
     contentController.text = widget.content;
+    log.d('init state content is ${widget.content}');
   }
 
   @override
@@ -77,6 +80,7 @@ class _DraftScreenState extends State<DraftScreen> {
                                   children: <Widget>[
                                     Expanded(
                                       child: TextField(
+                                        controller: contentController,
                                         decoration: const InputDecoration(
                                           hintText: '千里之行，从第一个字开始...',
                                         ),
