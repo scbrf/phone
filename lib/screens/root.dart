@@ -5,6 +5,7 @@ import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
 import 'package:scbrf/components/create_planet_dialog.dart';
 import 'package:scbrf/components/float_play_btn.dart';
+import 'package:scbrf/components/following_planet_dialog.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
 
@@ -48,7 +49,16 @@ class HomeScreenState extends State<HomeScreen> {
                   Padding(
                       padding: const EdgeInsets.only(right: 20.0),
                       child: GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx2) => FollowingPlanetDialog(() {
+                              Navigator.of(ctx2).pop();
+                              StoreProvider.of<AppState>(context)
+                                  .dispatch(RefreshStationAction());
+                            }),
+                          );
+                        },
                         child: const Icon(
                           Icons.group_add,
                           size: 26.0,
