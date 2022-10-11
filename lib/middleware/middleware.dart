@@ -29,6 +29,7 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, DraftTitleChangeAction>(_saveDraft),
     TypedMiddleware<AppState, DraftContentChangeAction>(_saveDraft),
     TypedMiddleware<AppState, NewDraftAction>(_loadDraftAndRoute),
+    TypedMiddleware<AppState, EditArticleAction>(_loadArticleDraftAndRoute),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
         ((store, action, next) {
       next(action);
@@ -42,6 +43,46 @@ List<Middleware<AppState>> createMiddleware() {
   ];
 }
 
+_loadArticleDraftAndRoute(
+    Store<AppState> store, EditArticleAction action, next) async {
+  next(action);
+  Directory draftRootDir = Directory(await Article.getDraftRoot());
+  if (!await draftRootDir.exists()) {
+    await draftRootDir.create();
+  }
+  var draft = action.target;
+  String draftDir = await draft.getDraftDir();
+  String draftFilePath = path.join(draftDir, 'draft.json');
+  var draftFile = File(draftFilePath);
+  if (await draftFile.exists()) {
+    draft = Article.fromJson(jsonDecode(await draftFile.readAsString()));
+  } else {
+    var rsp = await api('/article/get', {
+      "planetid": draft.planetid,
+      "articleid": draft.id,
+    });
+    draft = Article.fromJson(rsp).copyWith(planetid: draft.planetid);
+  }
+  for (String attachment in draft.attachments) {
+    var attachmentPath = path.join(draftDir, attachment);
+    var attachmentFile = File(attachmentPath);
+    if (!await attachmentFile.exists()) {
+      String url = Uri.http(store.state.currentStation,
+              '/${draft.planetid}/${draft.id}/$attachment')
+          .toString();
+      try {
+        log.d('fetch file from server $url $attachmentPath ...');
+        await fetch(url, attachmentPath);
+        log.d('fetch file from server succ $url $attachmentPath');
+      } catch (ex) {
+        log.e('fail to fetch attachment $attachment $ex');
+      }
+    }
+  }
+  store.dispatch(SetEditorDraftAction(draft));
+  navigatorKey.currentState!.pushNamed(ScbrfRoutes.draft);
+}
+
 _loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
   next(action);
 
@@ -49,8 +90,8 @@ _loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
   if (!await draftRootDir.exists()) {
     await draftRootDir.create();
   }
-  var stream = draftRootDir.list(recursive: false, followLinks: false);
   var draft = Article(planetid: action.planetid);
+  var stream = draftRootDir.list(recursive: false, followLinks: false);
   await for (final d in stream) {
     String draftFilePath = path.join(d.path, 'draft.json');
     var draftFile = File(draftFilePath);

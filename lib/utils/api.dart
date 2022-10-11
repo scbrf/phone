@@ -25,6 +25,16 @@ Future<Map<String, dynamic>> api(String url, Map<String, dynamic>? body) async {
   }
 }
 
+Future<void> fetch(String url, String localPath) async {
+  var client = http.Client();
+  try {
+    var response = await client.get(Uri.parse(url));
+    await File(localPath).writeAsBytes(response.bodyBytes);
+  } finally {
+    client.close();
+  }
+}
+
 Future<Map<String, dynamic>> upload(String p) async {
   var request = http.MultipartRequest("POST", Uri.http(apiEntry, '/upload'));
   request.files.add(await http.MultipartFile.fromPath(

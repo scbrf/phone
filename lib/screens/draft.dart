@@ -61,6 +61,7 @@ class _DraftScreenState extends State<DraftScreen> {
                                 String attachPath =
                                     path.join(draftPath, file.name);
                                 await file.saveTo(attachPath);
+                                log.d('attach a phone at $attachPath');
                                 attachments.add(file.name);
                               }
                               store.dispatch(SetEditorDraftAction(
@@ -103,6 +104,10 @@ class _DraftScreenState extends State<DraftScreen> {
                               navigator.pushNamed(ScbrfRoutes.preview);
                             } else if (item == 'publish') {
                               navigator.pushNamed(ScbrfRoutes.publish);
+                            } else if (item == 'delete') {
+                              await draft.remove();
+                              navigator.popUntil(
+                                  ModalRoute.withName(ScbrfRoutes.articles));
                             }
                           },
                           itemBuilder: (context) => [
@@ -110,6 +115,9 @@ class _DraftScreenState extends State<DraftScreen> {
                                 value: 'preview', child: Text('Preview')),
                             const PopupMenuItem<String>(
                                 value: 'publish', child: Text('Publish')),
+                            const PopupMenuDivider(),
+                            const PopupMenuItem<String>(
+                                value: 'delete', child: Text('Delete')),
                           ],
                         ),
                       ],

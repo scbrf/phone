@@ -19,16 +19,19 @@ class _PublishScreenState extends State<PublishScreen> {
   bool publishSucc = false;
 
   startPublish(Store<AppState> store) async {
+    log.d('call start public on oninit ...');
     var rsp = await api('/draft/publish', store.state.draft.toJson());
     var draftBase = await store.state.draft.getDraftDir();
     if (rsp.containsKey('files')) {
       for (String file in rsp['files']) {
+        log.d('need upload file $file');
         setState(() {
           progress = 'uploading $file ...';
         });
         try {
           await upload(path.join(draftBase, file));
         } catch (ex) {
+          log.e('upload file $file got exception $ex');
           setState(() {
             progress = ex.toString();
           });
@@ -42,7 +45,7 @@ class _PublishScreenState extends State<PublishScreen> {
       store.dispatch(RefreshStationAction(route: false));
     }
     setState(() {
-      progress = "${rsp["error"]}".isEmpty ? 'done!' : "${rsp["error"]}";
+      progress = "${rsp["error"]}".isEmpty ? 'Succ!' : "${rsp["error"]}";
       allowBack = true;
     });
   }

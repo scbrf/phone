@@ -82,6 +82,11 @@ class FocusArticleSelectedAction {
   FocusArticleSelectedAction(this.focus);
 }
 
+class EditArticleAction {
+  final Article target;
+  EditArticleAction(this.target);
+}
+
 class SetEditorDraftAction {
   final Article draft;
   SetEditorDraftAction(this.draft);
