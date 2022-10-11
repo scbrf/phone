@@ -58,7 +58,6 @@ class _FloatBtnState extends State<FloatPlayBtn> {
                   ValueListenableBuilder<ButtonState>(
                 valueListenable: pageManager.playButtonNotifier,
                 builder: ((context, btnState, child) {
-                  log.d('current player state is $btnState $title');
                   if (article.audioFilename.isEmpty && title.isEmpty) {
                     return const SizedBox();
                   }

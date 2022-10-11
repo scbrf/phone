@@ -121,6 +121,7 @@ class _DraftScreenState extends State<DraftScreen> {
                         children: [
                           TextField(
                             controller: titleController,
+                            textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
                               hintText: 'Title',
                             ),

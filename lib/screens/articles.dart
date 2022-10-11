@@ -7,6 +7,7 @@ import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
+import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
 
 class ArticlesScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ formatDate(timestamp) {
 
 class ArticlesScreenState extends State<ArticlesScreen> {
   var log = getLogger('ArticlesScreenState');
+  List<String> deleted = [];
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, Articles>(
@@ -57,7 +59,72 @@ class ArticlesScreenState extends State<ArticlesScreen> {
               children: ListTile.divideTiles(
                 context: context,
                 tiles: articles.articles
-                    .map<ListTile>((e) => ListTile(
+                    .where((e) => !deleted.contains(e.id))
+                    .map<Widget>(
+                      (e) => Dismissible(
+                        key: ValueKey(e.id),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (direction) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Confirm"),
+                                content: const Text(
+                                    "Would you like to delete this article?"),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("Cancel"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text("Continue"),
+                                    onPressed: () async {
+                                      var navigator = Navigator.of(context);
+                                      var messager =
+                                          ScaffoldMessenger.of(context);
+                                      var rsp = await api("/article/delete",
+                                          {"id": e.id, "planetid": e.planetid});
+                                      if ("${rsp['error']}".isEmpty) {
+                                        navigator.pop(true);
+                                      } else {
+                                        navigator.pop(false);
+                                        messager.showSnackBar(SnackBar(
+                                            content: Text("${rsp['error']}")));
+                                      }
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        background: Container(
+                          color: Colors.red,
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(
+                                    'Delete',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .button!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                )
+                              ]),
+                        ),
+                        onDismissed: (direction) {
+                          log.d('deleted through $direction');
+                          setState(() {
+                            deleted.add(e.id);
+                          });
+                        },
+                        child: ListTile(
                           leading: !e.read && !e.editable
                               ? Container(
                                   decoration: const BoxDecoration(
@@ -80,6 +147,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                               const EdgeInsets.fromLTRB(20, 3, 10, 3),
                           minLeadingWidth: 20,
                           subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
@@ -130,11 +198,16 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                               ),
                             ],
                           ),
+                          onLongPress: () {
+                            //Edit
+                          },
                           onTap: () {
                             StoreProvider.of<AppState>(context)
                                 .dispatch(FocusArticleSelectedAction(e));
                           },
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ).toList(),
             ),
