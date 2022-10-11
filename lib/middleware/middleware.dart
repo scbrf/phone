@@ -63,6 +63,9 @@ _loadArticleDraftAndRoute(
     });
     draft = Article.fromJson(rsp).copyWith(planetid: draft.planetid);
   }
+  if (!await Directory(draftDir).exists() && draft.attachments.isNotEmpty) {
+    await Directory(draftDir).create(recursive: true);
+  }
   for (String attachment in draft.attachments) {
     var attachmentPath = path.join(draftDir, attachment);
     var attachmentFile = File(attachmentPath);
