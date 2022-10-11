@@ -193,6 +193,8 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
       navigatorKey.currentState!
           .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
     }
+  } catch (ex) {
+    store.dispatch(NetworkError(ex.toString()));
   } finally {
     client.close();
   }
