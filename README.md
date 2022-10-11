@@ -1,16 +1,5 @@
 # phone
 
-A new Flutter project.
+[Scarborough](https://github.com/scbrf/scbrf)的移动端
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+移动端通过局域网地址连接PC端，因此只有移动端和PC同时连接在同一个局域网（同一个路由器）下才有可能正常工作。

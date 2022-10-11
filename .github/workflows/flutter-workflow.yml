@@ -2,8 +2,8 @@ name: Flutter CI
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -27,11 +27,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v0.0.3
-          release_name: Release v0.0.3
-          body: |
-            Changes in this Release
-            - Test github action
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
           draft: false
           prerelease: true
       - name: upload apk
