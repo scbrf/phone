@@ -20,6 +20,10 @@ jobs:
           channel: 'stable'
           flutter-version: '3.3.3'
       - run: flutter pub get
+      - name: Decode android/neumodore_key.jks
+        run: echo "${{ secrets.KEYSTORE_JKS_PROD }}" | base64 --decode > android/scbrf.jks
+      - name: Decode android/key.properties
+        run: echo "${{ secrets.KEY_PROPERTIES_PROD }}" | base64 --decode > android/key.properties
       - run: flutter build apk
       - name: Create Release
         id: create_release

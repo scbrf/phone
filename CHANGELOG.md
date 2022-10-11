@@ -1,1 +1,1 @@
-1. 测试通过github action 自动发版
+1. 增加Release版本单独签名
