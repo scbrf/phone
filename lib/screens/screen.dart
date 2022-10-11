@@ -5,3 +5,4 @@ export './webview.dart';
 export './qrscan.dart';
 export './draft.dart';
 export './preview.dart';
+export './publish.dart';

@@ -16,7 +16,10 @@ class CurrentStationSelectedAction {
 }
 
 //刷新当前的Station
-class RefreshStationAction {}
+class RefreshStationAction {
+  final bool route;
+  RefreshStationAction({this.route = true});
+}
 
 class MarkArticleReadedAction {
   final String articleid;

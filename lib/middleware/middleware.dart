@@ -56,7 +56,7 @@ _loadDraftAndRoute(Store<AppState> store, NewDraftAction action, next) async {
     var draftFile = File(draftFilePath);
     if (await draftFile.exists()) {
       Article dd = Article.fromJson(jsonDecode(await draftFile.readAsString()));
-      if (draft.planetid == action.planetid) {
+      if (draft.planetid == dd.planetid) {
         draft = dd;
         break;
       }
@@ -145,8 +145,10 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           ipfsPeers: mapBody['ipfspeers'],
           ipfsGateway: mapBody['ipfsGateway']),
     );
-    navigatorKey.currentState!
-        .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
+    if (action is! RefreshStationAction || action.route == true) {
+      navigatorKey.currentState!
+          .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
+    }
   } finally {
     client.close();
   }

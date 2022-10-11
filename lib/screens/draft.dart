@@ -5,7 +5,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
-import 'package:scbrf/app.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/utils/logger.dart';
@@ -103,8 +102,7 @@ class _DraftScreenState extends State<DraftScreen> {
                               await draft.renderDraftPreview();
                               navigator.pushNamed(ScbrfRoutes.preview);
                             } else if (item == 'publish') {
-                              // StoreProvider.of(context)
-                              //     .dispatch(DraftPublishAction());
+                              navigator.pushNamed(ScbrfRoutes.publish);
                             }
                           },
                           itemBuilder: (context) => [
@@ -201,6 +199,12 @@ class _DraftScreenState extends State<DraftScreen> {
                                                                     '<img alt="$e" src="$e">');
                                                         contentController.text =
                                                             newText;
+                                                        StoreProvider.of<
+                                                                    AppState>(
+                                                                context)
+                                                            .dispatch(
+                                                                DraftContentChangeAction(
+                                                                    newText));
                                                       },
                                                       child: Image.file(
                                                         File(path.join(

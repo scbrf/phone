@@ -41,7 +41,8 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                           child: GestureDetector(
                             onTap: () async {
                               StoreProvider.of<AppState>(context).dispatch(
-                                  NewDraftAction(articles.focusPlanetId));
+                                  NewDraftAction(articles.focusPlanetId
+                                      .substring('my:'.length)));
                             },
                             child: const Icon(
                               Icons.note_alt_outlined,

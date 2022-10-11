@@ -38,6 +38,7 @@ class Article {
   static Article fromJson(Map<String, dynamic> json) {
     return Article(
         id: json['id'] ?? '',
+        planetid: json['planetid'] ?? '',
         created: json['created'] ?? 0,
         read: json['read'] ?? false,
         title: json['title'] ?? '',
@@ -56,6 +57,7 @@ class Article {
   Map<String, dynamic> toJson() {
     return {
       "id": id,
+      "planetid": planetid,
       "created": created,
       "read": read,
       "title": title,
@@ -116,5 +118,9 @@ class Article {
     String html = markdownToHtml(content);
     await File(draftPreviewPath)
         .writeAsString(writeBasic.replaceAll('{{ content_html }}', html));
+  }
+
+  remove() async {
+    Directory(await getDraftDir()).delete(recursive: true);
   }
 }

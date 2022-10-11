@@ -5,5 +5,6 @@ class ScbrfRoutes {
   static const webiew = "/webview";
   static const scan = "/scan";
   static const draft = "/draft";
-  static String preview = "/preview";
+  static const preview = "/preview";
+  static const publish = "/publish";
 }
