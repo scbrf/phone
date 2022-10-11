@@ -42,6 +42,7 @@ class _AppState extends State<ScbrfApp> {
         routes: {
           ScbrfRoutes.scan: (context) => const QrScanScreen(),
           ScbrfRoutes.webiew: (context) => const WebviewScreen(),
+          ScbrfRoutes.preview: (context) => const PreviewScreen(),
           ScbrfRoutes.articles: (context) => const ArticlesScreen(),
           ScbrfRoutes.root: (context) => const HomeScreen(),
           ScbrfRoutes.draft: (context) => DraftScreen(

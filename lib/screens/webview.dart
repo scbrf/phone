@@ -10,8 +10,6 @@ import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 
-var log = getLogger('weview');
-
 class WebviewScreen extends StatefulWidget {
   const WebviewScreen({Key? key}) : super(key: key);
   @override
@@ -21,6 +19,7 @@ class WebviewScreen extends StatefulWidget {
 class WebviewScreenState extends State<WebviewScreen> {
   WebViewController? controller;
   bool loading = true;
+  var log = getLogger('weview');
 
   @override
   Widget build(BuildContext context) {

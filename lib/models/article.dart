@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:markdown/markdown.dart';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scbrf/utils/write_basic.dart';
 
 @immutable
 class Article {
@@ -74,6 +76,10 @@ class Article {
     return path.join(await Article.getDraftRoot(), id);
   }
 
+  Future<String> getDraftPreviewPath() async {
+    return path.join(await getDraftDir(), 'preview.html');
+  }
+
   Article copyWith({
     int? created,
     bool? read,
@@ -103,5 +109,12 @@ class Article {
         editable: editable ?? this.editable,
         attachments: attachments ?? this.attachments,
         content: content ?? this.content);
+  }
+
+  Future<void> renderDraftPreview() async {
+    String draftPreviewPath = await getDraftPreviewPath();
+    String html = markdownToHtml(content);
+    await File(draftPreviewPath)
+        .writeAsString(writeBasic.replaceAll('{{ content_html }}', html));
   }
 }

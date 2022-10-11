@@ -5,7 +5,9 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
+import 'package:scbrf/app.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/router.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:path/path.dart' as path;
 
@@ -94,13 +96,22 @@ class _DraftScreenState extends State<DraftScreen> {
                             ),
                           ),
                         ),
-                        PopupMenuButton<int>(
-                          onSelected: (item) {},
+                        PopupMenuButton<String>(
+                          onSelected: (item) async {
+                            var navigator = Navigator.of(context);
+                            if (item == 'preview') {
+                              await draft.renderDraftPreview();
+                              navigator.pushNamed(ScbrfRoutes.preview);
+                            } else if (item == 'publish') {
+                              // StoreProvider.of(context)
+                              //     .dispatch(DraftPublishAction());
+                            }
+                          },
                           itemBuilder: (context) => [
-                            const PopupMenuItem<int>(
-                                value: 0, child: Text('Preview')),
-                            const PopupMenuItem<int>(
-                                value: 1, child: Text('Publish')),
+                            const PopupMenuItem<String>(
+                                value: 'preview', child: Text('Preview')),
+                            const PopupMenuItem<String>(
+                                value: 'publish', child: Text('Publish')),
                           ],
                         ),
                       ],
@@ -124,7 +135,7 @@ class _DraftScreenState extends State<DraftScreen> {
                               ? [
                                   Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                                        const EdgeInsets.fromLTRB(0, 20, 0, 0),
                                     child: Text(
                                       'videofile attached',
                                       textAlign: TextAlign.start,
