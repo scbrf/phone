@@ -88,6 +88,14 @@ class HomeScreenState extends State<HomeScreen> {
                               ListTile(
                                 onTap: () {
                                   StoreProvider.of<AppState>(context).dispatch(
+                                      FocusPlanetSelectedAction("fair"));
+                                },
+                                leading: const Icon(Icons.newspaper_outlined),
+                                title: const Text('Fair'),
+                              ),
+                              ListTile(
+                                onTap: () {
+                                  StoreProvider.of<AppState>(context).dispatch(
                                       FocusPlanetSelectedAction("today"));
                                 },
                                 leading: const Icon(Icons.sunny),

@@ -7,6 +7,7 @@ class AppState {
   final LoadState state;
   final List<String> stations;
   final String currentStation;
+  final List<Article> fair;
   final List<FollowingPlanet> following;
   final List<Planet> planets;
   final String focusPlanet;
@@ -22,6 +23,7 @@ class AppState {
     this.following = const [],
     this.planets = const [],
     this.stations = const [],
+    this.fair = const [],
     this.address = '',
     this.currentStation = '',
     this.draft = const Article(),
@@ -36,6 +38,7 @@ class AppState {
     String? currentStation,
     List<FollowingPlanet>? following,
     List<Planet>? planets,
+    List<Article>? fair,
     String? focusPlanet,
     int? ipfsPeers,
     Article? draft,
@@ -52,6 +55,7 @@ class AppState {
       focusPlanet: focusPlanet ?? this.focusPlanet,
       ipfsPeers: ipfsPeers ?? this.ipfsPeers,
       draft: draft ?? this.draft,
+      fair: fair ?? this.fair,
       focus: focus ?? this.focus,
       address: address ?? this.address,
     );

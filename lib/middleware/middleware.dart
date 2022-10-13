@@ -186,6 +186,9 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           planets: (mapBody['planets'] as List)
               .map<Planet>((json) => Planet.fromJson(json))
               .toList(),
+          fair: (mapBody['fair'] as List)
+              .map<Article>((json) => Article.fromJson(json))
+              .toList(),
           ipfsPeers: mapBody['ipfspeers'],
           ipfsGateway: mapBody['ipfsGateway']),
     );

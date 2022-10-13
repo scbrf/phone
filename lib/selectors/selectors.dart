@@ -63,6 +63,9 @@ Articles articlesSelector(AppState s) {
   if (s.focusPlanet == 'today') {
     articlesTitle = 'Today';
     articles = getTodayArticles(s.following);
+  } else if (s.focusPlanet == 'fair') {
+    articlesTitle = 'Fair';
+    articles = s.fair;
   } else if (s.focusPlanet == 'unread') {
     articlesTitle = 'Unread';
     articles = getUnreadArticles(s.following);

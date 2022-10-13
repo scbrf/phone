@@ -58,9 +58,11 @@ class StationLoadedAction {
   final int ipfsPeers;
   final String address;
   final String ipfsGateway;
+  final List<Article> fair;
   StationLoadedAction(this.address,
       {this.following = const [],
       this.planets = const [],
+      this.fair = const [],
       this.ipfsPeers = 0,
       this.ipfsGateway = ''});
 }
