@@ -8,6 +8,8 @@ import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/selectors/selectors.dart';
+import 'package:scbrf/utils/api.dart';
+import 'package:scbrf/utils/logger.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
+  var log = getLogger('root');
+  var deleted = [];
   Map<String, bool> textIcon = {};
   @override
   Widget build(BuildContext context) {
@@ -139,20 +143,97 @@ class HomeScreenState extends State<HomeScreen> {
                           ),
                           ...ListTile.divideTiles(
                             context: context,
-                            tiles: state.planets.map(
-                              (e) => ListTile(
-                                onTap: () {
-                                  StoreProvider.of<AppState>(context).dispatch(
-                                      FocusPlanetSelectedAction("my:${e.id}"));
-                                },
-                                leading: Avatar(
-                                    e.avatar.isEmpty
-                                        ? ""
-                                        : "${state.ipfsGateway}/ipns/${e.ipns}/avatar.png",
-                                    e.name),
-                                title: Text(e.name),
-                              ),
-                            ),
+                            tiles: state.planets
+                                .where(
+                                    (element) => !deleted.contains(element.id))
+                                .map(
+                                  (e) => Dismissible(
+                                    key: ValueKey(e.id),
+                                    direction: DismissDirection.endToStart,
+                                    confirmDismiss: (direction) async {
+                                      return await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Confirm"),
+                                            content: const Text(
+                                                "Would you like to delete this planet?"),
+                                            actions: [
+                                              TextButton(
+                                                child: const Text("Cancel"),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(false);
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: const Text("Continue"),
+                                                onPressed: () async {
+                                                  var navigator =
+                                                      Navigator.of(context);
+                                                  var messager =
+                                                      ScaffoldMessenger.of(
+                                                          context);
+                                                  var rsp = await api(
+                                                      "/planet/delete", {
+                                                    "id": e.id,
+                                                  });
+                                                  if ("${rsp['error']}"
+                                                      .isEmpty) {
+                                                    navigator.pop(true);
+                                                  } else {
+                                                    navigator.pop(false);
+                                                    messager.showSnackBar(SnackBar(
+                                                        content: Text(
+                                                            "${rsp['error']}")));
+                                                  }
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    background: Container(
+                                      color: Colors.red,
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text(
+                                                'Delete',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .button!
+                                                    .copyWith(
+                                                        color: Colors.white),
+                                              ),
+                                            )
+                                          ]),
+                                    ),
+                                    onDismissed: (direction) {
+                                      log.d('deleted through $direction');
+                                      setState(() {
+                                        deleted.add(e.id);
+                                      });
+                                    },
+                                    child: ListTile(
+                                      onTap: () {
+                                        StoreProvider.of<AppState>(context)
+                                            .dispatch(FocusPlanetSelectedAction(
+                                                "my:${e.id}"));
+                                      },
+                                      leading: Avatar(
+                                          e.avatar.isEmpty
+                                              ? ""
+                                              : "${state.ipfsGateway}/ipns/${e.ipns}/avatar.png",
+                                          e.name),
+                                      title: Text(e.name),
+                                    ),
+                                  ),
+                                ),
                           ).toList(),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
@@ -163,27 +244,103 @@ class HomeScreenState extends State<HomeScreen> {
                           ),
                           ...ListTile.divideTiles(
                             context: context,
-                            tiles: state.following.map(
-                              (e) => ListTile(
-                                onTap: () {
-                                  StoreProvider.of<AppState>(context).dispatch(
-                                      FocusPlanetSelectedAction(
-                                          "following:${e.id}"));
-                                },
-                                leading: Avatar(
-                                    e.avatar.isEmpty
-                                        ? ""
-                                        : "${state.ipfsGateway}/ipfs/${e.cid}/avatar.png",
-                                    e.name),
-                                title: Text(e.name),
-                                trailing: numberSelector(
-                                            state)["following:${e.id}"] ==
-                                        0
-                                    ? null
-                                    : Text(
-                                        '${numberSelector(state)["following:${e.id}"]}'),
-                              ),
-                            ),
+                            tiles: state.following
+                                .where(
+                                    (element) => !deleted.contains(element.id))
+                                .map((e) => Dismissible(
+                                      key: ValueKey(e.id),
+                                      direction: DismissDirection.endToStart,
+                                      confirmDismiss: (direction) async {
+                                        return await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Confirm"),
+                                              content: const Text(
+                                                  "Would you like to unfollow this planet?"),
+                                              actions: [
+                                                TextButton(
+                                                  child: const Text("Cancel"),
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(false);
+                                                  },
+                                                ),
+                                                TextButton(
+                                                  child: const Text("Continue"),
+                                                  onPressed: () async {
+                                                    var navigator =
+                                                        Navigator.of(context);
+                                                    var messager =
+                                                        ScaffoldMessenger.of(
+                                                            context);
+                                                    var rsp = await api(
+                                                        "/planet/unfollow",
+                                                        {"id": e.id});
+                                                    if ("${rsp['error']}"
+                                                        .isEmpty) {
+                                                      navigator.pop(true);
+                                                    } else {
+                                                      navigator.pop(false);
+                                                      messager.showSnackBar(
+                                                          SnackBar(
+                                                              content: Text(
+                                                                  "${rsp['error']}")));
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      background: Container(
+                                        color: Colors.red,
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Text(
+                                                  'Delete',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .button!
+                                                      .copyWith(
+                                                          color: Colors.white),
+                                                ),
+                                              )
+                                            ]),
+                                      ),
+                                      onDismissed: (direction) {
+                                        log.d('deleted through $direction');
+                                        setState(() {
+                                          deleted.add(e.id);
+                                        });
+                                      },
+                                      child: ListTile(
+                                        onTap: () {
+                                          StoreProvider.of<AppState>(context)
+                                              .dispatch(
+                                                  FocusPlanetSelectedAction(
+                                                      "following:${e.id}"));
+                                        },
+                                        leading: Avatar(
+                                            e.avatar.isEmpty
+                                                ? ""
+                                                : "${state.ipfsGateway}/ipfs/${e.cid}/avatar.png",
+                                            e.name),
+                                        title: Text(e.name),
+                                        trailing: numberSelector(state)[
+                                                    "following:${e.id}"] ==
+                                                0
+                                            ? null
+                                            : Text(
+                                                '${numberSelector(state)["following:${e.id}"]}'),
+                                      ),
+                                    )),
                           ).toList(),
                         ],
                       ),
