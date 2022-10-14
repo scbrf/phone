@@ -32,8 +32,12 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, NewDraftAction>(_loadDraftAndRoute),
     TypedMiddleware<AppState, EditArticleAction>(_loadArticleDraftAndRoute),
     TypedMiddleware<AppState, FocusPlanetSelectedAction>(
-        ((store, action, next) {
+        ((store, action, next) async {
       next(action);
+      if (action.focus == 'fair') {
+        await api('/fair/markread', {});
+        store.dispatch(MarkFairReadedAction());
+      }
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.articles);
     })),
     TypedMiddleware<AppState, FocusArticleSelectedAction>(

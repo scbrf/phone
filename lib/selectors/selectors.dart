@@ -43,6 +43,7 @@ List<Article> getStarredArticles(List<FollowingPlanet> following) {
 
 Map<String, int> numberSelector(AppState a) {
   Map<String, int> ret = {};
+  ret['fair'] = a.fair.where((a) => !a.read).length;
   ret['today'] = getTodayArticles(a.following).where((a) => !a.read).length;
   ret['unread'] = getUnreadArticles(a.following).where((a) => !a.read).length;
   ret['starred'] = getStarredArticles(a.following).where((a) => !a.read).length;

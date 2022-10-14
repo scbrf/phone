@@ -96,6 +96,23 @@ class HomeScreenState extends State<HomeScreen> {
                                 },
                                 leading: const Icon(Icons.newspaper_outlined),
                                 title: const Text('Fair'),
+                                trailing: numberSelector(state)["fair"] == 0
+                                    ? null
+                                    : Container(
+                                        width: 20,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                            color: Colors.orange[800],
+                                            shape: BoxShape.circle),
+                                        child: Center(
+                                          child: Text(
+                                            '${numberSelector(state)["fair"]}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .button!
+                                                .copyWith(color: Colors.white),
+                                          ),
+                                        )),
                               ),
                               ListTile(
                                 onTap: () {

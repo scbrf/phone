@@ -85,6 +85,8 @@ class FocusArticleSelectedAction {
   FocusArticleSelectedAction(this.focus, {this.doRoute = false});
 }
 
+class MarkFairReadedAction {}
+
 class TriggerStarredArticleAction {
   final Article target;
   TriggerStarredArticleAction(this.target);

@@ -55,9 +55,11 @@ final appReducer = combineReducers([
             (_, a) => a.following)(s.following, a),
         planets: TypedReducer<List<Planet>, StationLoadedAction>(
             (_, a) => a.planets)(s.planets, a),
-        fair:
-            TypedReducer<List<Article>, StationLoadedAction>((_, a) => a.fair)(
-                s.fair, a),
+        fair: combineReducers([
+          TypedReducer<List<Article>, StationLoadedAction>((_, a) => a.fair),
+          TypedReducer<List<Article>, MarkFairReadedAction>(
+              (s, a) => s.map<Article>((a) => a.copyWith(read: true)).toList()),
+        ])(s.fair, a),
         focusPlanet:
             TypedReducer<String, FocusPlanetSelectedAction>((_, a) => a.focus)(
                 s.focusPlanet, a),
