@@ -84,6 +84,16 @@ class FocusArticleSelectedAction {
   FocusArticleSelectedAction(this.focus);
 }
 
+class TriggerStarredArticleAction {
+  final Article target;
+  TriggerStarredArticleAction(this.target);
+}
+
+class TriggerArticleStarredSuccAction {
+  final Article target;
+  TriggerArticleStarredSuccAction(this.target);
+}
+
 class EditArticleAction {
   final Article target;
   EditArticleAction(this.target);

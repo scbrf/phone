@@ -98,7 +98,12 @@ class ArticlesScreenState extends State<ArticlesScreen> {
               width: 10,
               height: 10,
             )
-          : const Icon(Icons.abc),
+          : e.starred
+              ? const Icon(
+                  Icons.star_border_outlined,
+                  color: Colors.orangeAccent,
+                )
+              : const Icon(Icons.abc),
       isThreeLine: true,
       title: Padding(
         padding: const EdgeInsets.only(bottom: 5),
@@ -156,9 +161,41 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         ],
       ),
       onLongPress: () async {
-        if (!e.editable) return;
-        //Editor article.
         var store = StoreProvider.of<AppState>(context);
+        if (!e.editable) {
+          //Follow的文章，弹出Star对话框
+          //Editor article.
+          bool confirm = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Confirm"),
+                content:
+                    const Text("Would you like to star/unstar this article?"),
+                actions: [
+                  TextButton(
+                    child: const Text("Cancel"),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                  TextButton(
+                    child: const Text("Continue"),
+                    onPressed: () async {
+                      var navigator = Navigator.of(context);
+                      navigator.pop(true);
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          if (confirm) {
+            store.dispatch(TriggerStarredArticleAction(e));
+          }
+          return;
+        }
+        //Editor article.
         bool confirm = await showDialog(
           context: context,
           builder: (BuildContext context) {

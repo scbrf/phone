@@ -25,6 +25,7 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, RefreshStationAction>(loadStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
+    TypedMiddleware<AppState, TriggerStarredArticleAction>(checkAndMarkStarred),
     TypedMiddleware<AppState, SetEditorDraftAction>(_saveDraft),
     TypedMiddleware<AppState, DraftTitleChangeAction>(_saveDraft),
     TypedMiddleware<AppState, DraftContentChangeAction>(_saveDraft),
@@ -126,6 +127,23 @@ _saveDraft(Store<AppState> store, action, NextDispatcher next) async {
   String draftFilePath = path.join(draftPath, 'draft.json');
   File draftFile = File(draftFilePath);
   await draftFile.writeAsString(jsonEncode(store.state.draft.toJson()));
+}
+
+checkAndMarkStarred(Store<AppState> store, TriggerStarredArticleAction action,
+    NextDispatcher next) async {
+  next(action);
+  //mark as starred
+  var rsp = await api('/article/markstarred', {
+    "planetid": action.target.planetid,
+    "articleid": action.target.id,
+    "starred": !action.target.starred
+  });
+  if ((rsp['error'] as String).isEmpty) {
+    log.d('mark starred succ!');
+    store.dispatch(TriggerArticleStarredSuccAction(action.target));
+  } else {
+    log.d('mark starred error, reason: ${rsp['error']} !');
+  }
 }
 
 checkAndMarkReaded(Store<AppState> store, MarkArticleReadedAction action,

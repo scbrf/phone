@@ -18,6 +18,17 @@ final appReducer = combineReducers([
         }).toList());
       }).toList());
     }
+    if (action is TriggerArticleStarredSuccAction) {
+      return s.copyWith(
+          following: s.following.map((p) {
+        if (p.id != action.target.planetid) return p;
+        return p.copyWith(
+            articles: p.articles.map((a) {
+          if (a.id != action.target.id) return a;
+          return a.copyWith(starred: true);
+        }).toList());
+      }).toList());
+    }
     return s;
   },
   //基本的设置逻辑
