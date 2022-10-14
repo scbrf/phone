@@ -25,7 +25,7 @@ final appReducer = combineReducers([
         return p.copyWith(
             articles: p.articles.map((a) {
           if (a.id != action.target.id) return a;
-          return a.copyWith(starred: true);
+          return a.copyWith(starred: !action.target.starred);
         }).toList());
       }).toList());
     }
