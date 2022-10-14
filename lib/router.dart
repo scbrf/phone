@@ -7,4 +7,5 @@ class ScbrfRoutes {
   static const draft = "/draft";
   static const preview = "/preview";
   static const publish = "/publish";
+  static const fair = "/fair";
 }

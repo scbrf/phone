@@ -81,7 +81,8 @@ class FocusPlanetSelectedAction {
 
 class FocusArticleSelectedAction {
   final Article focus;
-  FocusArticleSelectedAction(this.focus);
+  final bool doRoute;
+  FocusArticleSelectedAction(this.focus, {this.doRoute = false});
 }
 
 class TriggerStarredArticleAction {

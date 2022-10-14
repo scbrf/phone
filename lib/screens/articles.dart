@@ -5,6 +5,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
 import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
@@ -162,7 +163,9 @@ class ArticlesScreenState extends State<ArticlesScreen> {
       ),
       onLongPress: () async {
         var store = StoreProvider.of<AppState>(context);
-        if (!e.editable) {
+        StoreProvider.of<AppState>(context)
+            .dispatch(FocusArticleSelectedAction(e));
+        if (store.state.focusPlanet.startsWith("following:")) {
           //Follow的文章，弹出Star对话框
           //Editor article.
           bool confirm = await showDialog(
@@ -193,40 +196,48 @@ class ArticlesScreenState extends State<ArticlesScreen> {
           if (confirm) {
             store.dispatch(TriggerStarredArticleAction(e));
           }
-          return;
-        }
-        //Editor article.
-        bool confirm = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Confirm"),
-              content: const Text("Would you like to edit this article?"),
-              actions: [
-                TextButton(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: const Text("Continue"),
-                  onPressed: () async {
-                    var navigator = Navigator.of(context);
-                    navigator.pop(true);
-                  },
-                ),
-              ],
-            );
-          },
-        );
-        if (confirm) {
-          store.dispatch(EditArticleAction(e));
+        } else if (store.state.focusPlanet.startsWith('my:')) {
+          //Editor article.
+          bool confirm = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Confirm"),
+                content: const Text("Would you like to edit this article?"),
+                actions: [
+                  TextButton(
+                    child: const Text("Cancel"),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                  TextButton(
+                    child: const Text("Fair"),
+                    onPressed: () async {
+                      var navigator = Navigator.of(context);
+                      navigator.pop(false);
+                      navigator.pushNamed(ScbrfRoutes.fair);
+                    },
+                  ),
+                  TextButton(
+                    child: const Text("Continue"),
+                    onPressed: () async {
+                      var navigator = Navigator.of(context);
+                      navigator.pop(true);
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          if (confirm) {
+            store.dispatch(EditArticleAction(e));
+          }
         }
       },
       onTap: () {
         StoreProvider.of<AppState>(context)
-            .dispatch(FocusArticleSelectedAction(e));
+            .dispatch(FocusArticleSelectedAction(e, doRoute: true));
       },
     );
   }

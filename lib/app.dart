@@ -45,6 +45,7 @@ class _AppState extends State<ScbrfApp> {
           ScbrfRoutes.preview: (context) => const PreviewScreen(),
           ScbrfRoutes.publish: (context) => const PublishScreen(),
           ScbrfRoutes.articles: (context) => const ArticlesScreen(),
+          ScbrfRoutes.fair: (context) => const FairRequestScreen(),
           ScbrfRoutes.root: (context) => const HomeScreen(),
           ScbrfRoutes.draft: (context) => DraftScreen(
               widget.store.state.draft.title, widget.store.state.draft.content),
