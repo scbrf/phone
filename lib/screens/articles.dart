@@ -9,6 +9,7 @@ import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
 import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
+import 'package:video_player/video_player.dart';
 
 class ArticlesScreen extends StatefulWidget {
   const ArticlesScreen({Key? key}) : super(key: key);
@@ -110,7 +111,10 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         padding: const EdgeInsets.only(bottom: 5),
         child: Text(
           e.title,
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       contentPadding: const EdgeInsets.fromLTRB(20, 3, 10, 3),
@@ -120,11 +124,24 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
+            //Summary
             e.summary.replaceAll("\n", ""),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          ...e.videoFilename.isEmpty
+              ? []
+              : [
+                  Container(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: ArticleVideoPlayer(
+                      e,
+                      key: ValueKey('video_${e.id}'),
+                    ),
+                  )
+                ],
           Container(
+            // Datetime and icons
             padding: const EdgeInsets.only(top: 10),
             child: Row(
               children: [
@@ -285,5 +302,53 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             ),
           );
         });
+  }
+}
+
+class ArticleVideoPlayer extends StatefulWidget {
+  final Article article;
+  const ArticleVideoPlayer(this.article, {Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _ArticleVideoPlayerState();
+}
+
+class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
+  late VideoPlayerController _controller;
+  var log = getLogger('_ArticleVideoPlayerState');
+  @override
+  void initState() {
+    super.initState();
+    String videourl = '${widget.article.url}/${widget.article.videoFilename}';
+    _controller = VideoPlayerController.network(videourl)
+      ..initialize().then((_) {
+        log.d('init video done', videourl);
+        setState(() {});
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? GestureDetector(
+            onTap: () {
+              setState(() {
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
+              });
+              log.d('video player tapped!');
+            },
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+          )
+        : Container();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 }
