@@ -8,6 +8,7 @@
         android:label="斯卡布罗"
         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
+        android:largeHeap="true"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name="com.ryanheise.audioservice.AudioServiceActivity"

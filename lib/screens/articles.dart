@@ -8,6 +8,7 @@ import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/fullscreen_video_player.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/models/vc_store.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
 import 'package:scbrf/utils/api.dart';
@@ -97,6 +98,15 @@ class ArticlesScreenState extends State<ArticlesScreen> {
 
   onVideoControllerEvent(
       VideoPlayerController controller, Article playing) async {
+    if (mounted && MediaQuery.of(context).orientation != Orientation.portrait) {
+      return;
+    }
+    if (!mounted) {
+      if (controller.value.isPlaying) {
+        await controller.pause();
+      }
+      return;
+    }
     if (controller.value.isPlaying) {
       log.d('playing ${controller.dataSource}');
       if (playingController != null && controller != playingController) {
@@ -304,25 +314,13 @@ class ArticlesScreenState extends State<ArticlesScreen> {
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (context, orientation) {
       log.d('orientation change to $orientation');
-      // if (orientation == Orientation.landscape && playingArticle != null) {
-      //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-      // } else {
-      //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      // }
-      // orientation == Orientation.landscape && playingArticle != null
-      //     ? Hero(
-      //         tag: 'video_${playingArticle!.id}',
-      //         child: ArticleVideoPlayer(playingArticle!,
-      //             key: ValueKey('video_${playingArticle!.id}')),
-      //       )
-      //     :
       if (orientation == Orientation.landscape && playingArticle != null) {
+        VideoControllers.singleton.get(playingArticle!, 'fullscreen Player');
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (BuildContext context) =>
-                FullscreenVideoPlayer(playingController!),
+                FullscreenVideoPlayer(playingArticle!),
           ));
-          // playingController!.pause();
         });
       }
       return StoreConnector<AppState, Articles>(
@@ -382,19 +380,20 @@ class ArticleVideoPlayer extends StatefulWidget {
 
 class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
   late VideoPlayerController _controller;
+  static const src = 'listtile';
   var log = getLogger('_ArticleVideoPlayerState');
   @override
   void initState() {
     super.initState();
-    String videourl = '${widget.article.url}/${widget.article.videoFilename}';
-    _controller = VideoPlayerController.network(videourl)
-      ..initialize().then((_) {
-        log.d('init video done', videourl);
+    _controller = VideoControllers.singleton.get(widget.article, src);
+    if (!_controller.value.isInitialized) {
+      _controller.initialize().then((_) {
         setState(() {});
-      });
-    if (widget.listenner != null) {
-      _controller.addListener(() {
-        widget.listenner!(_controller, widget.article);
+        if (widget.listenner != null) {
+          _controller.addListener(() {
+            widget.listenner!(_controller, widget.article);
+          });
+        }
       });
     }
   }
@@ -429,7 +428,7 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
 
   @override
   void dispose() {
+    VideoControllers.singleton.dispose(widget.article, src);
     super.dispose();
-    _controller.dispose();
   }
 }

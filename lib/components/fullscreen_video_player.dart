@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:scbrf/models/article.dart';
+import 'package:scbrf/models/vc_store.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:video_player/video_player.dart';
 
 class FullscreenVideoPlayer extends StatefulWidget {
-  final VideoPlayerController _controller;
-  const FullscreenVideoPlayer(this._controller, {Key? key}) : super(key: key);
+  final Article _article;
+  const FullscreenVideoPlayer(this._article, {Key? key}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _FullscreenVideoPlayerState();
 }
 
 class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
   var log = getLogger('_ArticleVideoPlayerState');
+  static const src = "fullscreen Player";
+  late VideoPlayerController _controller;
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    _controller = VideoControllers.singleton.get(widget._article, src);
   }
 
   @override
@@ -32,16 +37,16 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       return GestureDetector(
         onTap: () {
           setState(() {
-            widget._controller.value.isPlaying
-                ? widget._controller.pause()
-                : widget._controller.play();
+            _controller.value.isPlaying
+                ? _controller.pause()
+                : _controller.play();
           });
           log.d('video player tapped!');
         },
         child: Center(
           child: AspectRatio(
-            aspectRatio: widget._controller.value.aspectRatio,
-            child: VideoPlayer(widget._controller),
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
           ),
         ),
       );
@@ -50,6 +55,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   void dispose() {
+    VideoControllers.singleton.dispose(widget._article, src);
     super.dispose();
   }
 }
