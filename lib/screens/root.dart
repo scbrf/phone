@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
-import 'package:scbrf/components/CreatePlanetDialog.dart';
+import 'package:scbrf/components/create_planet_dialog.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';
@@ -21,6 +24,22 @@ class HomeScreenState extends State<HomeScreen> {
   var log = getLogger('root');
   var deleted = [];
   Map<String, bool> textIcon = {};
+  final ImagePicker _picker = ImagePicker();
+
+  changePlanetAvatar(ctx, Planet p) async {
+    var store = StoreProvider.of<AppState>(ctx);
+    XFile? file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 250,
+      maxHeight: 250,
+      imageQuality: 80,
+    );
+    if (file == null) return;
+    await api('/planet/avatar',
+        {"id": p.id, "avatar": base64.encode(await file.readAsBytes())});
+    store.dispatch(RefreshStationAction(route: false));
+  }
+
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, AppState>(
@@ -241,6 +260,60 @@ class HomeScreenState extends State<HomeScreen> {
                                         StoreProvider.of<AppState>(context)
                                             .dispatch(FocusPlanetSelectedAction(
                                                 "my:${e.id}"));
+                                      },
+                                      onLongPress: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: ((dialogCtx) {
+                                              return AlertDialog(
+                                                title: const Text("Confirm"),
+                                                content: const Text(
+                                                    "What action you want to take to this planet?"),
+                                                actions: [
+                                                  TextButton(
+                                                    child: const Text("Cancel"),
+                                                    onPressed: () {
+                                                      Navigator.of(dialogCtx)
+                                                          .pop(false);
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    child: const Text("Avatar"),
+                                                    onPressed: () async {
+                                                      Navigator.of(dialogCtx)
+                                                          .pop(false);
+                                                      changePlanetAvatar(
+                                                          context, e);
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    child: const Text("Edit"),
+                                                    onPressed: () async {
+                                                      Navigator.of(dialogCtx)
+                                                          .pop();
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (ctx) =>
+                                                            CreatePlanetDialog(
+                                                          () {
+                                                            Navigator.of(ctx)
+                                                                .pop();
+                                                            StoreProvider.of<
+                                                                        AppState>(
+                                                                    context)
+                                                                .dispatch(
+                                                                    RefreshStationAction(
+                                                                        route:
+                                                                            false));
+                                                          },
+                                                          planet: e,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            }));
                                       },
                                       leading: Avatar(
                                           e.avatar.isEmpty
