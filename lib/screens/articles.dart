@@ -95,9 +95,13 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         child: listTile(e));
   }
 
-  onVideoControllerEvent(VideoPlayerController controller, Article playing) {
+  onVideoControllerEvent(
+      VideoPlayerController controller, Article playing) async {
     if (controller.value.isPlaying) {
       log.d('playing ${controller.dataSource}');
+      if (playingController != null && controller != playingController) {
+        await playingController!.pause();
+      }
       playingArticle = playing;
       playingController = controller;
       SystemChrome.setPreferredOrientations([]);

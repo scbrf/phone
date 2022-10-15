@@ -38,9 +38,11 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
           });
           log.d('video player tapped!');
         },
-        child: AspectRatio(
-          aspectRatio: widget._controller.value.aspectRatio,
-          child: VideoPlayer(widget._controller),
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: widget._controller.value.aspectRatio,
+            child: VideoPlayer(widget._controller),
+          ),
         ),
       );
     });
