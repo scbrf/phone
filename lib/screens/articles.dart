@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
+import 'package:scbrf/components/fullscreen_video_player.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
@@ -26,6 +28,8 @@ formatDate(timestamp) {
 class ArticlesScreenState extends State<ArticlesScreen> {
   var log = getLogger('ArticlesScreenState');
   List<String> deleted = [];
+  Article? playingArticle;
+  VideoPlayerController? playingController;
 
   Widget editableListTile(Article e) {
     return Dismissible(
@@ -90,6 +94,34 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         child: listTile(e));
   }
 
+  onVideoControllerEvent(VideoPlayerController controller, Article playing) {
+    if (controller.value.isPlaying) {
+      log.d('playing ${controller.dataSource}');
+      playingArticle = playing;
+      playingController = controller;
+      SystemChrome.setPreferredOrientations([]);
+    } else {
+      log.d('stop playing ${controller.dataSource}');
+      if (controller == playingController) {
+        playingArticle = null;
+        playingController = null;
+      }
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.portraitUp,
+      ]);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+  }
+
   Widget listTile(Article e) {
     return ListTile(
       leading: !e.read && !e.editable
@@ -134,9 +166,13 @@ class ArticlesScreenState extends State<ArticlesScreen> {
               : [
                   Container(
                     padding: const EdgeInsets.only(top: 10),
-                    child: ArticleVideoPlayer(
-                      e,
-                      key: ValueKey('video_${e.id}'),
+                    child: Hero(
+                      tag: 'video_${e.id}',
+                      child: ArticleVideoPlayer(
+                        e,
+                        listenner: onVideoControllerEvent,
+                        key: ValueKey('video_${e.id}'),
+                      ),
                     ),
                   )
                 ],
@@ -261,7 +297,30 @@ class ArticlesScreenState extends State<ArticlesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, Articles>(
+    return OrientationBuilder(builder: (context, orientation) {
+      log.d('orientation change to $orientation');
+      // if (orientation == Orientation.landscape && playingArticle != null) {
+      //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+      // } else {
+      //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      // }
+      // orientation == Orientation.landscape && playingArticle != null
+      //     ? Hero(
+      //         tag: 'video_${playingArticle!.id}',
+      //         child: ArticleVideoPlayer(playingArticle!,
+      //             key: ValueKey('video_${playingArticle!.id}')),
+      //       )
+      //     :
+      if (orientation == Orientation.landscape && playingArticle != null) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (BuildContext context) =>
+                FullscreenVideoPlayer(playingController!),
+          ));
+          // playingController!.pause();
+        });
+      }
+      return StoreConnector<AppState, Articles>(
         distinct: true,
         converter: (Store<AppState> store) => articlesSelector(store.state),
         builder: (ctx, articles) {
@@ -301,13 +360,17 @@ class ArticlesScreenState extends State<ArticlesScreen> {
               ).toList(),
             ),
           );
-        });
+        },
+      );
+    });
   }
 }
 
 class ArticleVideoPlayer extends StatefulWidget {
   final Article article;
-  const ArticleVideoPlayer(this.article, {Key? key}) : super(key: key);
+  final Function? listenner;
+  const ArticleVideoPlayer(this.article, {this.listenner, Key? key})
+      : super(key: key);
   @override
   State<StatefulWidget> createState() => _ArticleVideoPlayerState();
 }
@@ -324,6 +387,11 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
         log.d('init video done', videourl);
         setState(() {});
       });
+    if (widget.listenner != null) {
+      _controller.addListener(() {
+        widget.listenner!(_controller, widget.article);
+      });
+    }
   }
 
   @override
