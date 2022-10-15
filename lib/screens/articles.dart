@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
@@ -411,7 +412,15 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
               child: VideoPlayer(_controller),
             ),
           )
-        : Container();
+        : AspectRatio(
+            aspectRatio: 16.0 / 9,
+            child: Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.grey.shade400,
+                size: 30,
+              ),
+            ),
+          );
   }
 
   @override
