@@ -1,7 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:scbrf/models/FairInfo.dart';
+import 'package:scbrf/models/fair_info.dart';
 import 'package:scbrf/utils/api.dart';
 
 import '../models/models.dart';
@@ -19,26 +19,32 @@ class _FairRequestState extends State<FairRequestScreen> {
   TextEditingController fundController = TextEditingController(text: '0.01');
   TextEditingController durationController = TextEditingController(text: '24');
   TextEditingController passwdController = TextEditingController();
-  String errorPasswd = '';
-  String errorFund = '';
-  String errorDuration = '';
+  String? errorPasswd;
+  String? errorFund;
+  String? errorDuration;
   bool validate() {
     if (passwdController.text.isEmpty) {
       errorPasswd = '不能为空';
     } else {
-      errorPasswd = '';
+      errorPasswd = null;
     }
     if (durationController.text.isEmpty) {
       errorDuration = '不能为空';
     } else {
-      errorDuration = '';
+      errorDuration = null;
     }
     if (fundController.text.isEmpty) {
       errorFund = '不能为空';
     } else {
-      errorFund = '';
+      errorFund = null;
     }
-    return errorPasswd.isEmpty && errorDuration.isEmpty && errorFund.isEmpty;
+    if (int.parse(durationController.text) * 3600 >= info.durationLimit) {
+      errorDuration = '投放时长超过限制';
+    } else {
+      errorDuration = null;
+    }
+    setState(() {});
+    return errorPasswd == null && errorDuration == null && errorFund == null;
   }
 
   @override
