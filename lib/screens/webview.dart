@@ -93,6 +93,12 @@ class WebviewScreenState extends State<WebviewScreen> {
                   },
                   javascriptChannels: <JavascriptChannel>{
                     JavascriptChannel(
+                      name: 'scbrf',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        injectEthereum('');
+                      },
+                    ),
+                    JavascriptChannel(
                       name: 'ipc',
                       onMessageReceived: (JavascriptMessage message) async {
                         log.d('receive from web ${message.message}');
