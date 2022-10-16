@@ -28,6 +28,7 @@ class WebviewScreenState extends State<WebviewScreen> {
       log.d('inject script, address is $address');
       controller!.runJavascript("""(()=>{
   let resolves={}
+  console.log('start inject ethereum ...');
   window.ethereum = {
       address: '$address',
       isScarborough: true,
@@ -110,7 +111,7 @@ class WebviewScreenState extends State<WebviewScreen> {
                     }
                   },
                   onPageStarted: injectEthereum,
-                  onPageFinished: (url) {
+                  onPageFinished: (url) async {
                     if (!article.read && !article.editable) {
                       StoreProvider.of<AppState>(context).dispatch(
                           MarkArticleReadedAction(

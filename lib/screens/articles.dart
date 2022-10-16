@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -176,7 +178,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          ...e.videoFilename.isEmpty
+          ...e.videoFilename.isEmpty || !Platform.isAndroid
               ? []
               : [
                   Container(
