@@ -81,8 +81,8 @@ class QrScanScreenState extends State<QrScanScreen> {
     });
     controller.scannedDataStream.listen((scanData) {
       if (scanData.code!.startsWith('scbrf://')) {
+        controller.pauseCamera();
         if (StoreProvider.of<AppState>(context).state.currentStation.isEmpty) {
-          controller.pauseCamera();
           StoreProvider.of<AppState>(context).dispatch(
               CurrentStationSelectedAction(
                   scanData.code!.substring('scbrf://'.length)));

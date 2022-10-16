@@ -8,7 +8,7 @@ class VCSource {
   final Article article;
   VCSource(this.article)
       : controller = VideoPlayerController.network(
-            '${article.url}/${article.videoFilename}');
+            '${article.url}${Uri.encodeComponent(article.videoFilename)}');
 }
 
 class VideoControllers {
@@ -19,6 +19,8 @@ class VideoControllers {
     log.d('get ${article.id} $src');
     if (!controllers.containsKey(article.id)) {
       controllers[article.id] = VCSource(article);
+      log.d(
+          'load video from ${controllers[article.id]!.controller.dataSource}');
     }
     controllers[article.id]!.src.add(src);
     return controllers[article.id]!.controller;

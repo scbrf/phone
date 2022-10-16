@@ -394,6 +394,8 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
             widget.listenner!(_controller, widget.article);
           });
         }
+      }).catchError((err) {
+        log.e('play video meet error $err', err);
       });
     }
   }

@@ -196,9 +196,9 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
   next(action);
   var client = http.Client();
   try {
-    log.d('try to load station from ${store.state.currentStation}');
-    var response = await client
-        .post(Uri.http(store.state.currentStation, '/site'), body: {});
+    var uri = Uri.http(store.state.currentStation, '/site');
+    log.d('try to load station from ${store.state.currentStation} $uri');
+    var response = await client.post(uri, body: {});
     String body = utf8.decode(response.bodyBytes);
     var mapBody = jsonDecode(body) as Map;
     log.d('list site ${store.state.currentStation} got $body');
@@ -221,6 +221,7 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
     }
   } catch (ex) {
+    log.e('load meet error $ex');
     store.dispatch(NetworkError(ex.toString()));
   } finally {
     client.close();
