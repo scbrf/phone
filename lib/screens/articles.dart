@@ -116,8 +116,8 @@ class ArticlesScreenState extends State<ArticlesScreen> {
       playingController = controller;
       SystemChrome.setPreferredOrientations([]);
     } else {
-      log.d('stop playing ${controller.dataSource}');
       if (controller == playingController) {
+        log.d('stop playing ${controller.dataSource}');
         playingArticle = null;
         playingController = null;
       }
@@ -387,21 +387,28 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
     super.initState();
     _controller = VideoControllers.singleton.get(widget.article, src);
     if (!_controller.value.isInitialized) {
-      _controller.initialize().then((_) {
+      _controller.initialize().then((_) async {
+        log.d(
+            'video init done, need set state ${widget.article.videoFilename}');
+        await Future.delayed(const Duration(milliseconds: 500));
         setState(() {});
+
         if (widget.listenner != null) {
           _controller.addListener(() {
             widget.listenner!(_controller, widget.article);
           });
         }
       }).catchError((err) {
-        log.e('play video meet error $err', err);
+        log.e(
+            'play video ${widget.article.videoFilename} meet error $err ', err);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    log.d(
+        'rebuild vide player widget ${widget.article.videoFilename} ${_controller.value.isInitialized}');
     return _controller.value.isInitialized
         ? GestureDetector(
             onTap: () {

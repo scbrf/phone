@@ -16,11 +16,11 @@ class VideoControllers {
   static var singleton = VideoControllers();
   final Map<String, VCSource> controllers = {};
   get(Article article, String src) {
-    log.d('get ${article.id} $src');
+    log.d('get ${article.id} ${article.videoFilename} $src');
     if (!controllers.containsKey(article.id)) {
       controllers[article.id] = VCSource(article);
       log.d(
-          'load video from ${controllers[article.id]!.controller.dataSource}');
+          'load video from ${article.videoFilename} ${controllers[article.id]!.controller.dataSource}');
     }
     controllers[article.id]!.src.add(src);
     return controllers[article.id]!.controller;
@@ -35,7 +35,7 @@ class VideoControllers {
     }
     controllers[article.id]!.src.remove(src);
     //just gives some delay, maybe it will reuse
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 1));
     if (controllers.containsKey(article.id) &&
         controllers[article.id]!.src.isEmpty) {
       log.d('real dispose ${article.id} $src');
