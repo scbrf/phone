@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:scbrf/utils/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'notifiers/play_button_notifier.dart';
 import 'notifiers/progress_notifier.dart';
 import 'notifiers/repeat_button_notifier.dart';
@@ -20,15 +23,79 @@ class PageManager {
   final isShuffleModeEnabledNotifier = ValueNotifier<bool>(false);
 
   final _audioHandler = getIt<AudioHandler>();
+  int lastPos = 0;
 
   // Events: Calls coming from the UI
   void init() async {
+    await _loadPlaylist();
     _listenToChangesInPlaylist();
     _listenToPlaybackState();
     _listenToCurrentPosition();
     _listenToBufferedPosition();
     _listenToTotalDuration();
     _listenToChangesInSong();
+  }
+
+  Future<void> _loadPlaylist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastList = prefs.getString('playlist') ?? '[]';
+    var playlist = jsonDecode(lastList);
+    final mediaItems = List<MediaItem>.from(playlist
+        .map<MediaItem>((song) => MediaItem(
+              id: song['id'] ?? '',
+              album: song['album'] ?? '',
+              title: song['title'] ?? '',
+              extras: {'url': song['url']},
+            ))
+        .toList());
+    _audioHandler.addQueueItems(mediaItems);
+    await Future.delayed(const Duration(milliseconds: 300));
+    String? id = prefs.getString('playing');
+    log.d("load playing id is $id");
+    if (id != null) {
+      for (int i = 0; i < playlist.length; i++) {
+        if (id == playlist[i]['id']) {
+          log.d('need skip to $i');
+          _audioHandler.skipToQueueItem(i);
+          await Future.delayed(const Duration(milliseconds: 100));
+          break;
+        }
+      }
+    }
+    int? pos = prefs.getInt('playpos');
+    if (pos != null) {
+      log.d("should seek to $pos");
+      _audioHandler.seek(Duration(milliseconds: pos));
+    }
+  }
+
+  savePlayList(List<MediaItem> list) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+        'playlist',
+        jsonEncode(list
+            .map<Map<String, dynamic>>((e) => {
+                  "id": e.id,
+                  "album": e.album,
+                  "title": e.title,
+                  "url": "${e.extras!['url']}",
+                })
+            .toList()));
+  }
+
+  savePosition(int pos) async {
+    if ((pos < lastPos) || (pos - lastPos > 5000)) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt('playpos', pos);
+      lastPos = pos;
+    }
+  }
+
+  savePlaylistFocus(id) async {
+    if (id != null) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('playing', id);
+    }
   }
 
   void _listenToChangesInPlaylist() {
@@ -40,6 +107,7 @@ class PageManager {
         final newList = playlist.map((item) => item.title).toList();
         playlistNotifier.value = newList;
       }
+      savePlayList(playlist);
       _updateSkipButtons();
     });
   }
@@ -71,6 +139,7 @@ class PageManager {
         buffered: oldState.buffered,
         total: oldState.total,
       );
+      savePosition(position.inMilliseconds);
     });
   }
 
@@ -102,6 +171,7 @@ class PageManager {
     _audioHandler.mediaItem.listen((mediaItem) {
       currentSongTitleNotifier.value = mediaItem?.title ?? '';
       _updateSkipButtons();
+      savePlaylistFocus(mediaItem?.id);
     });
   }
 

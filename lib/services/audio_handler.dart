@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:scbrf/utils/logger.dart';
 
 Future<AudioHandler> initAudioService() async {
   return await AudioService.init(
@@ -16,6 +17,7 @@ Future<AudioHandler> initAudioService() async {
 class MyAudioHandler extends BaseAudioHandler {
   final _player = AudioPlayer();
   final _playlist = ConcatenatingAudioSource(children: []);
+  var log = getLogger('MyAudioHandler');
 
   MyAudioHandler() {
     _loadEmptyPlaylist();
@@ -157,6 +159,7 @@ class MyAudioHandler extends BaseAudioHandler {
 
   @override
   Future<void> skipToQueueItem(int index) async {
+    log.d('asking to skip to $index');
     if (index < 0 || index >= queue.value.length) return;
     if (_player.shuffleModeEnabled) {
       index = _player.shuffleIndices![index];

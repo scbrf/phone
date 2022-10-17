@@ -83,58 +83,48 @@ class WebviewScreenState extends State<WebviewScreen> {
           return Scaffold(
             floatingActionButton: const FloatPlayBtn(),
             body: SafeArea(
-                child: Stack(
-              children: [
-                WebView(
-                  key: const ValueKey('webview'),
-                  initialUrl: article.url,
-                  onWebViewCreated: (c) {
-                    controller = c;
-                  },
-                  javascriptChannels: <JavascriptChannel>{
-                    JavascriptChannel(
-                      name: 'scbrf',
-                      onMessageReceived: (JavascriptMessage message) async {
-                        injectEthereum('');
-                      },
-                    ),
-                    JavascriptChannel(
-                      name: 'ipc',
-                      onMessageReceived: (JavascriptMessage message) async {
-                        log.d('receive from web ${message.message}');
-                        runWebInvoke(message.message);
-                      },
-                    )
-                  },
-                  userAgent: 'Planet/MobileJS',
-                  debuggingEnabled: true,
-                  onProgress: (progress) {
-                    log.d('loading webpage $progress');
-                    if (progress >= 100) {
-                      setState(() {
-                        loading = false;
-                      });
-                    }
-                  },
-                  onPageStarted: injectEthereum,
-                  onPageFinished: (url) async {
-                    if (!article.read && !article.editable) {
-                      StoreProvider.of<AppState>(context).dispatch(
-                          MarkArticleReadedAction(
-                              article.planetid, article.id));
-                    }
-                  },
-                  javascriptMode: JavascriptMode.unrestricted,
-                ),
-                ...loading
-                    ? [
-                        const Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      ]
-                    : [],
-              ],
-            )),
+              child: WebView(
+                key: const ValueKey('webview'),
+                initialUrl: article.url,
+                allowsInlineMediaPlayback: true,
+                onWebViewCreated: (c) {
+                  controller = c;
+                },
+                javascriptChannels: <JavascriptChannel>{
+                  JavascriptChannel(
+                    name: 'scbrf',
+                    onMessageReceived: (JavascriptMessage message) async {
+                      injectEthereum('');
+                    },
+                  ),
+                  JavascriptChannel(
+                    name: 'ipc',
+                    onMessageReceived: (JavascriptMessage message) async {
+                      log.d('receive from web ${message.message}');
+                      runWebInvoke(message.message);
+                    },
+                  )
+                },
+                userAgent: 'Planet/MobileJS',
+                debuggingEnabled: true,
+                onProgress: (progress) {
+                  log.d('loading webpage $progress');
+                  if (progress >= 100) {
+                    setState(() {
+                      loading = false;
+                    });
+                  }
+                },
+                onPageStarted: injectEthereum,
+                onPageFinished: (url) async {
+                  if (!article.read && !article.editable) {
+                    StoreProvider.of<AppState>(context).dispatch(
+                        MarkArticleReadedAction(article.planetid, article.id));
+                  }
+                },
+                javascriptMode: JavascriptMode.unrestricted,
+              ),
+            ),
           );
         });
   }
