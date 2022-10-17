@@ -119,6 +119,8 @@ class PageManager {
 
   void play() => _audioHandler.play();
   void pause() => _audioHandler.pause();
+  void skipToItem(idx) => _audioHandler.skipToQueueItem(idx);
+  void removeAtIdx(idx) => _audioHandler.removeQueueItemAt(idx);
 
   void seek(Duration position) => _audioHandler.seek(position);
 

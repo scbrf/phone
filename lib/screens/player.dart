@@ -60,11 +60,22 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                             )
                                           ]),
                                     ),
-                                    onDismissed: (direction) {
-                                      getIt<PageManager>().remove();
+                                    confirmDismiss: (direction) async {
+                                      var idx = list.indexOf(e);
+                                      if (e == playing) {
+                                        getIt<PageManager>().stop();
+                                        await Future.delayed(
+                                            const Duration(milliseconds: 300));
+                                      }
+                                      getIt<PageManager>().removeAtIdx(idx);
+                                      return true;
                                     },
                                     child: ListTile(
                                       title: Text(e),
+                                      onTap: () {
+                                        int myIdx = list.indexOf(e);
+                                        getIt<PageManager>().skipToItem(myIdx);
+                                      },
                                       selected: playing == e,
                                       leading: const Icon(
                                           Icons.queue_music_outlined),
