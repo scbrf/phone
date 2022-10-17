@@ -178,21 +178,6 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          ...e.videoFilename.isEmpty || !Platform.isAndroid
-              ? []
-              : [
-                  Container(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Hero(
-                      tag: 'video_${e.id}',
-                      child: ArticleVideoPlayer(
-                        e,
-                        listenner: onVideoControllerEvent,
-                        key: ValueKey('video_${e.id}'),
-                      ),
-                    ),
-                  )
-                ],
           Container(
             // Datetime and icons
             padding: const EdgeInsets.only(top: 10),
