@@ -8,4 +8,5 @@ class ScbrfRoutes {
   static const preview = "/preview";
   static const publish = "/publish";
   static const fair = "/fair";
+  static const musicPlayer = "/player";
 }

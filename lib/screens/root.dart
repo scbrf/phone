@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
 import 'package:scbrf/components/create_planet_dialog.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/router.dart';
 import 'package:scbrf/selectors/selectors.dart';
+import 'package:scbrf/services/service_locator.dart';
 import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
 
@@ -46,29 +49,49 @@ class HomeScreenState extends State<HomeScreen> {
         distinct: true,
         converter: (Store<AppState> store) => store.state,
         builder: (ctx, state) {
-          return Scaffold(
+          return ValueListenableBuilder<List<String>>(
+            valueListenable: getIt<PageManager>().playlistNotifier,
+            builder: (context, playlist, child) => Scaffold(
               appBar: AppBar(
                 centerTitle: false,
                 title: const Text('Scarborough'),
                 actions: [
+                  ...playlist.isEmpty
+                      ? []
+                      : [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 20.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context)
+                                    .pushNamed(ScbrfRoutes.musicPlayer);
+                              },
+                              child: const Icon(
+                                Icons.queue_music_outlined,
+                                size: 26.0,
+                              ),
+                            ),
+                          ),
+                        ],
                   Padding(
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx2) => CreatePlanetDialog(() {
-                              Navigator.of(ctx2).pop();
-                              StoreProvider.of<AppState>(context)
-                                  .dispatch(RefreshStationAction());
-                            }),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.add,
-                          size: 26.0,
-                        ),
-                      )),
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx2) => CreatePlanetDialog(() {
+                            Navigator.of(ctx2).pop();
+                            StoreProvider.of<AppState>(context)
+                                .dispatch(RefreshStationAction());
+                          }),
+                        );
+                      },
+                      child: const Icon(
+                        Icons.add,
+                        size: 26.0,
+                      ),
+                    ),
+                  ),
                   Padding(
                       padding: const EdgeInsets.only(right: 20.0),
                       child: GestureDetector(
@@ -89,7 +112,6 @@ class HomeScreenState extends State<HomeScreen> {
                       )),
                 ],
               ),
-              floatingActionButton: const FloatPlayBtn(),
               body: Column(
                 children: [
                   Expanded(
@@ -444,7 +466,9 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                   )
                 ],
-              ));
+              ),
+            ),
+          );
         });
   }
 }

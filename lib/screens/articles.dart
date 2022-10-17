@@ -352,7 +352,6 @@ class ArticlesScreenState extends State<ArticlesScreen> {
                     ]
                   : <Widget>[],
             ),
-            floatingActionButton: const FloatPlayBtn(),
             body: ListView(
               children: ListTile.divideTiles(
                 context: context,

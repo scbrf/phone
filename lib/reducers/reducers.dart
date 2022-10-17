@@ -77,7 +77,7 @@ final appReducer = combineReducers([
               (s, a) => s.copyWith(content: a.value))
         ])(s.draft, a),
         focus: TypedReducer<Article, FocusArticleSelectedAction>(
-            (_, a) => a.focus)(s.draft, a),
+            (_, a) => a.focus)(s.focus, a),
         address: TypedReducer<String, StationLoadedAction>((_, a) => a.address)(
             s.address, a),
       ),

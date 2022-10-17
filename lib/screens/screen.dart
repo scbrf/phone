@@ -7,3 +7,4 @@ export './draft.dart';
 export './preview.dart';
 export './publish.dart';
 export './fair.dart';
+export './player.dart';
