@@ -26,7 +26,8 @@ class _FloatBtnState extends State<FloatPlayBtn> {
           return article.audioFilename.isNotEmpty
               ? FloatingActionButton(
                   onPressed: () {
-                    String url = "${article.url}${article.audioFilename}";
+                    String url =
+                        "${article.url}${Uri.encodeComponent(article.audioFilename)}";
                     getIt<PageManager>().add(
                         {'id': article.id, 'title': article.title, 'url': url});
                     ALDownloader.download(url);

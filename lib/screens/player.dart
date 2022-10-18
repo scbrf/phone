@@ -32,7 +32,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             "id": list[i].id,
             "album": "${list[i].album}",
             "title": list[i].title,
-            "url": local.filePath
+            "url": 'file://${local.filePath}'
           });
           break; //一次只修改一个
         } else if (state == ALDownloaderStatus.unstarted) {
