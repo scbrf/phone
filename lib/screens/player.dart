@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:al_downloader/al_downloader.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:scbrf/PageManager.dart';
@@ -12,8 +16,72 @@ class MusicPlayer extends StatefulWidget {
 }
 
 class _MusicPlayerState extends State<MusicPlayer> {
+  replaceWithLocal(
+      List<MediaItem> list, String playing, ButtonState state) async {
+    for (int i = 0; i < list.length; i++) {
+      log.d("$playing is playing, skip...");
+      if (list[i].title == playing && state != ButtonState.paused) continue;
+      String url = list[i].extras!['url'];
+      if (url.startsWith('http://')) {
+        final status = ALDownloader.getDownloadStatusForUrl(url);
+        if (status == ALDownloaderStatus.succeeded) {
+          var local = await ALDownloaderPersistentFileManager
+              .lazyGetALDownloaderPathModelForUrl(url);
+          getIt<PageManager>().removeAtIdx(i);
+          getIt<PageManager>().add({
+            "id": list[i].id,
+            "album": "${list[i].album}",
+            "title": list[i].title,
+            "url": local.filePath
+          });
+          break; //一次只修改一个
+        } else if (state == ALDownloaderStatus.unstarted) {
+          startDownload(url);
+        }
+      }
+    }
+  }
+
+  startDownload(url) {
+    ALDownloader.download(url,
+        downloaderHandlerInterface: ALDownloaderHandlerInterface(
+          succeededHandler: () async {
+            setState(() {});
+          },
+          progressHandler: (_) {
+            setState(() {});
+          },
+          failedHandler: () {
+            setState(() {});
+          },
+          pausedHandler: () {
+            setState(() {});
+          },
+        ));
+  }
+
+  removeMediaItem(list, playing, e) async {
+    var idx = list.indexOf(e);
+    if (e.title == playing) {
+      getIt<PageManager>().stop();
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+    getIt<PageManager>().removeAtIdx(idx);
+    String url = e.extras!['url'];
+    if (url.startsWith('http://')) {
+      ALDownloader.cancel(url);
+    } else {
+      try {
+        File(url).delete();
+      } catch (ex) {
+        log.e('error on delete file $url', ex);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final pm = getIt<PageManager>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scarborough Podcast Player'),
@@ -26,64 +94,93 @@ class _MusicPlayerState extends State<MusicPlayer> {
               slivers: [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: ValueListenableBuilder(
-                    valueListenable:
-                        getIt<PageManager>().currentSongTitleNotifier,
-                    builder: (context, playing, child) =>
-                        ValueListenableBuilder(
-                      valueListenable: getIt<PageManager>().playlistNotifier,
-                      builder: (context, list, child) => Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: ListTile.divideTiles(
-                            context: context,
-                            tiles: list
-                                .map<Widget>(
-                                  (e) => Dismissible(
-                                    key: ValueKey(e),
-                                    direction: DismissDirection.endToStart,
-                                    background: Container(
-                                      color: Colors.red,
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(10),
-                                              child: Text(
-                                                'Delete',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .button!
-                                                    .copyWith(
-                                                        color: Colors.white),
-                                              ),
-                                            )
-                                          ]),
-                                    ),
-                                    confirmDismiss: (direction) async {
-                                      var idx = list.indexOf(e);
-                                      if (e == playing) {
-                                        getIt<PageManager>().stop();
-                                        await Future.delayed(
-                                            const Duration(milliseconds: 300));
-                                      }
-                                      getIt<PageManager>().removeAtIdx(idx);
-                                      return true;
-                                    },
-                                    child: ListTile(
-                                      title: Text(e),
-                                      onTap: () {
-                                        int myIdx = list.indexOf(e);
-                                        getIt<PageManager>().skipToItem(myIdx);
+                  child: ValueListenableBuilder<ButtonState>(
+                    valueListenable: pm.playButtonNotifier,
+                    builder: (_, playState, __) => ValueListenableBuilder(
+                      valueListenable: pm.currentSongTitleNotifier,
+                      builder: (context, playing, child) =>
+                          ValueListenableBuilder(
+                        valueListenable: pm.playlistNotifier,
+                        builder: (context, list, child) {
+                          replaceWithLocal(list, playing, playState);
+                          return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: ListTile.divideTiles(
+                                context: context,
+                                tiles: list.map<Widget>(
+                                  (e) {
+                                    String url = e.extras!['url'];
+                                    bool isLocal = !url.startsWith('http://');
+                                    ALDownloaderStatus? status;
+                                    if (!isLocal) {
+                                      status =
+                                          ALDownloader.getDownloadStatusForUrl(
+                                              url);
+                                      log.d(
+                                          'download status for url $url is $status');
+                                    }
+                                    return Dismissible(
+                                      key: ValueKey(e),
+                                      direction: DismissDirection.endToStart,
+                                      background: Container(
+                                        color: Colors.red,
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Text(
+                                                  'Delete',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .button!
+                                                      .copyWith(
+                                                          color: Colors.white),
+                                                ),
+                                              )
+                                            ]),
+                                      ),
+                                      confirmDismiss: (direction) async {
+                                        await removeMediaItem(list, playing, e);
+                                        return true;
                                       },
-                                      selected: playing == e,
-                                      leading: const Icon(
-                                          Icons.queue_music_outlined),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ).toList()),
+                                      child: ListTile(
+                                        title: Text(e.title),
+                                        onTap: () {
+                                          int myIdx = list.indexOf(e);
+                                          getIt<PageManager>()
+                                              .skipToItem(myIdx);
+                                        },
+                                        selected: playing == e.title,
+                                        leading: const Icon(
+                                            Icons.queue_music_outlined),
+                                        trailing: status ==
+                                                ALDownloaderStatus.succeeded
+                                            ? const Icon(
+                                                Icons.offline_pin_outlined)
+                                            : status ==
+                                                    ALDownloaderStatus
+                                                        .downloading
+                                                ? const Icon(Icons.downloading)
+                                                : isLocal
+                                                    ? null
+                                                    : GestureDetector(
+                                                        onTap: (() {
+                                                          startDownload(
+                                                              e.extras!['url']);
+                                                        }),
+                                                        child: const Icon(
+                                                            Icons.download),
+                                                      ),
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ).toList());
+                        },
+                      ),
                     ),
                   ),
                 ),

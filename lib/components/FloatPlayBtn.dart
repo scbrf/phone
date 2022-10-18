@@ -1,3 +1,4 @@
+import 'package:al_downloader/al_downloader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -25,12 +26,11 @@ class _FloatBtnState extends State<FloatPlayBtn> {
           return article.audioFilename.isNotEmpty
               ? FloatingActionButton(
                   onPressed: () {
-                    getIt<PageManager>().add({
-                      'id': article.id,
-                      'title': article.title,
-                      'url': "${article.url}${article.audioFilename}"
-                    });
-                    getIt<PageManager>().play();
+                    String url = "${article.url}${article.audioFilename}";
+                    getIt<PageManager>().add(
+                        {'id': article.id, 'title': article.title, 'url': url});
+                    ALDownloader.download(url);
+                    log.d('url $url should be in download queue ...');
                     ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("audio file queued!")));
                   },

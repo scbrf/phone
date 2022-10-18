@@ -14,7 +14,7 @@ var log = getLogger('pageManager');
 class PageManager {
   // Listeners: Updates going to the UI
   final currentSongTitleNotifier = ValueNotifier<String>('');
-  final playlistNotifier = ValueNotifier<List<String>>([]);
+  final playlistNotifier = ValueNotifier<List<MediaItem>>([]);
   final progressNotifier = ProgressNotifier();
   final repeatButtonNotifier = RepeatButtonNotifier();
   final isFirstSongNotifier = ValueNotifier<bool>(true);
@@ -104,7 +104,7 @@ class PageManager {
         playlistNotifier.value = [];
         currentSongTitleNotifier.value = '';
       } else {
-        final newList = playlist.map((item) => item.title).toList();
+        final newList = [...playlist];
         playlistNotifier.value = newList;
       }
       savePlayList(playlist);

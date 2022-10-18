@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:redux/redux.dart';
@@ -49,7 +50,7 @@ class HomeScreenState extends State<HomeScreen> {
         distinct: true,
         converter: (Store<AppState> store) => store.state,
         builder: (ctx, state) {
-          return ValueListenableBuilder<List<String>>(
+          return ValueListenableBuilder<List<MediaItem>>(
             valueListenable: getIt<PageManager>().playlistNotifier,
             builder: (context, playlist, child) => Scaffold(
               appBar: AppBar(
