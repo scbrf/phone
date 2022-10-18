@@ -55,6 +55,16 @@ class LoadingScreenState extends State<LoadingScreen> {
                           },
                           child: const Text('扫码'),
                         ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pushNamed(ScbrfRoutes.musicPlayer);
+                          },
+                          child: const Text('播客离线播放'),
+                        ),
                       )
                     ],
                   ),
