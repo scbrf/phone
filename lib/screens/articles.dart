@@ -260,7 +260,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             .dispatch(FocusArticleSelectedAction(e));
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            settings: const RouteSettings(name: '/webview'),
+            settings: const RouteSettings(name: ScbrfRoutes.webiew),
             builder: (BuildContext context) => WebviewScreen(e),
           ),
         );
