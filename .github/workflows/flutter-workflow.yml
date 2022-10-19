@@ -2,47 +2,65 @@ name: Flutter CI
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 jobs:
   build-ios:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-        flutter-version: '3.3.3'
-    - run: flutter pub get
-    - run: flutter build ios --release --no-codesign
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.3.3'
+      - run: flutter pub get
+      - run: |
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cd Payload
+          ln -s ../Runner.app
+          cd ..
+          zip -r scbrf-unsigned.ipa Payload
+      - name: release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          prerelease: true
+          draft: false
+          body_path: CHANGELOG.md
+          files: |
+            build/ios/iphoneos/scbrf-unsigned.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # build-apk:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-java@v3
-  #       with:
-  #         distribution: 'temurin'
-  #         java-version: '17'
-  #         cache: 'gradle'
-  #     - uses: subosito/flutter-action@v2
-  #       with:
-  #         channel: 'stable'
-  #         flutter-version: '3.3.3'
-  #     - run: flutter pub get
-  #     - name: Decode android/neumodore_key.jks
-  #       run: echo "${{ secrets.KEYSTORE_JKS_PROD }}" | base64 --decode > android/scbrf.jks
-  #     - name: Decode android/key.properties
-  #       run: echo "${{ secrets.KEY_PROPERTIES_PROD }}" | base64 --decode > android/key.properties
-  #     - run: flutter build apk
-  #     - name: release
-  #       uses: softprops/action-gh-release@v1
-  #       if: startsWith(github.ref, 'refs/tags/')
-  #       with:
-  #         prerelease: true
-  #         draft: false
-  #         body_path: CHANGELOG.md
-  #         files: |
-  #           build/app/outputs/flutter-apk/app-release.apk
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.3.3'
+      - run: flutter pub get
+      - name: Decode android/neumodore_key.jks
+        run: echo "${{ secrets.KEYSTORE_JKS_PROD }}" | base64 --decode > android/scbrf.jks
+      - name: Decode android/key.properties
+        run: echo "${{ secrets.KEY_PROPERTIES_PROD }}" | base64 --decode > android/key.properties
+      - run: flutter build apk
+      - name: release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          prerelease: true
+          draft: false
+          body_path: CHANGELOG.md
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
