@@ -63,7 +63,7 @@ class PageManager {
       }
     }
     int? pos = prefs.getInt('playpos');
-    if (pos != null) {
+    if (pos != null && mediaItems.isNotEmpty && id != null && id.isNotEmpty) {
       log.d("should seek to $pos");
       _audioHandler.seek(Duration(milliseconds: pos));
     }

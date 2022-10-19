@@ -81,8 +81,9 @@ class FocusPlanetSelectedAction {
 
 class FocusArticleSelectedAction {
   final Article focus;
-  final bool doRoute;
-  FocusArticleSelectedAction(this.focus, {this.doRoute = false});
+  FocusArticleSelectedAction(
+    this.focus,
+  );
 }
 
 class MarkFairReadedAction {}

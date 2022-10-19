@@ -43,9 +43,6 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, FocusArticleSelectedAction>(
         ((store, action, next) async {
       next(action);
-      if (action.doRoute) {
-        navigatorKey.currentState!.pushNamed(ScbrfRoutes.webiew);
-      }
     })),
   ];
 }

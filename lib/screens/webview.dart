@@ -1,17 +1,22 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:redux/redux.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/FloatPlayBtn.dart';
+import 'package:scbrf/components/fullscreen_video_player.dart';
 import 'package:scbrf/models/models.dart';
+import 'package:scbrf/models/vc_store.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:video_player/video_player.dart';
 
 class WebviewScreen extends StatefulWidget {
-  const WebviewScreen({Key? key}) : super(key: key);
+  final Article article;
+  const WebviewScreen(this.article, {Key? key}) : super(key: key);
   @override
   WebviewScreenState createState() => WebviewScreenState();
 }
@@ -20,6 +25,21 @@ class WebviewScreenState extends State<WebviewScreen> {
   WebViewController? controller;
   bool loading = true;
   var log = getLogger('weview');
+
+  @override
+  void initState() {
+    SystemChrome.setPreferredOrientations([]);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,57 +95,152 @@ class WebviewScreenState extends State<WebviewScreen> {
       }
     }
 
-    return StoreConnector<AppState, Article>(
-        distinct: true,
-        converter: (Store<AppState> store) => store.state.focus,
-        builder: (ctx, article) {
-          log.d('rebuild webview and load from ${article.url}');
-          return Scaffold(
-            floatingActionButton: const FloatPlayBtn(),
-            body: SafeArea(
-              child: WebView(
-                key: const ValueKey('webview'),
-                initialUrl: article.url,
-                allowsInlineMediaPlayback: true,
-                onWebViewCreated: (c) {
-                  controller = c;
-                },
-                javascriptChannels: <JavascriptChannel>{
-                  JavascriptChannel(
-                    name: 'scbrf',
-                    onMessageReceived: (JavascriptMessage message) async {
-                      injectEthereum('');
-                    },
-                  ),
-                  JavascriptChannel(
-                    name: 'ipc',
-                    onMessageReceived: (JavascriptMessage message) async {
-                      log.d('receive from web ${message.message}');
-                      runWebInvoke(message.message);
-                    },
-                  )
-                },
-                userAgent: 'Planet/MobileJS',
-                debuggingEnabled: true,
-                onProgress: (progress) {
-                  log.d('loading webpage $progress');
-                  if (progress >= 100) {
-                    setState(() {
-                      loading = false;
-                    });
-                  }
-                },
-                onPageStarted: injectEthereum,
-                onPageFinished: (url) async {
-                  if (!article.read && !article.editable) {
-                    StoreProvider.of<AppState>(context).dispatch(
-                        MarkArticleReadedAction(article.planetid, article.id));
-                  }
-                },
-                javascriptMode: JavascriptMode.unrestricted,
+    return OrientationBuilder(builder: (context, orientation) {
+      log.d('orientation change to $orientation');
+      if (orientation == Orientation.landscape &&
+          widget.article.videoFilename.isNotEmpty) {
+        VideoControllers.singleton.get(widget.article, 'fullscreen Player');
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (BuildContext context) =>
+                FullscreenVideoPlayer(widget.article),
+          ));
+        });
+      }
+      return Scaffold(
+        floatingActionButton: const FloatPlayBtn(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              ...widget.article.videoFilename.isEmpty
+                  ? []
+                  : [ArticleVideoPlayer(widget.article)],
+              Expanded(
+                child: WebView(
+                  key: const ValueKey('webview'),
+                  initialUrl: widget.article.url,
+                  allowsInlineMediaPlayback: true,
+                  onWebViewCreated: (c) {
+                    controller = c;
+                  },
+                  javascriptChannels: <JavascriptChannel>{
+                    JavascriptChannel(
+                      name: 'scbrf',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        injectEthereum('');
+                      },
+                    ),
+                    JavascriptChannel(
+                      name: 'ipc',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        log.d('receive from web ${message.message}');
+                        runWebInvoke(message.message);
+                      },
+                    )
+                  },
+                  userAgent: 'Planet/MobileJS',
+                  debuggingEnabled: true,
+                  onProgress: (progress) {
+                    log.d('loading webpage $progress');
+                    if (progress >= 100) {
+                      setState(() {
+                        loading = false;
+                      });
+                    }
+                  },
+                  onPageStarted: injectEthereum,
+                  onPageFinished: (url) async {
+                    if (!widget.article.read && !widget.article.editable) {
+                      StoreProvider.of<AppState>(context).dispatch(
+                          MarkArticleReadedAction(
+                              widget.article.planetid, widget.article.id));
+                    }
+                    await controller!.runJavascript("""
+                    if (document.querySelector('.video-container')){
+                      document.querySelector('.video-container').style.display = 'none';
+                    }
+                  """);
+                  },
+                  javascriptMode: JavascriptMode.unrestricted,
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class ArticleVideoPlayer extends StatefulWidget {
+  final Article article;
+  final Function? listenner;
+  const ArticleVideoPlayer(this.article, {this.listenner, Key? key})
+      : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _ArticleVideoPlayerState();
+}
+
+class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
+  late VideoPlayerController _controller;
+  static const src = 'listtile';
+  var log = getLogger('_ArticleVideoPlayerState');
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoControllers.singleton.get(widget.article, src);
+    if (!_controller.value.isInitialized) {
+      _controller.initialize().then((_) async {
+        log.d(
+            'video init done, need set state ${widget.article.videoFilename}');
+        await Future.delayed(const Duration(milliseconds: 500));
+        setState(() {});
+
+        if (widget.listenner != null) {
+          _controller.addListener(() {
+            widget.listenner!(_controller, widget.article);
+          });
+        }
+      }).catchError((err) {
+        log.e(
+            'play video ${widget.article.videoFilename} meet error $err ', err);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    VideoControllers.singleton.dispose(widget.article, src);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    log.d(
+        'rebuild vide player widget ${widget.article.videoFilename} ${_controller.value.isInitialized}');
+    return _controller.value.isInitialized
+        ? GestureDetector(
+            onTap: () {
+              setState(() {
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
+              });
+              log.d('video player tapped!');
+            },
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+          )
+        : AspectRatio(
+            aspectRatio: 16.0 / 9,
+            child: Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.grey.shade400,
+                size: 30,
               ),
             ),
           );
-        });
   }
 }

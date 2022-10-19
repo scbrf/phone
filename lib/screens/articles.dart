@@ -1,17 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/actions/actions.dart';
-import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/fullscreen_video_player.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/models/vc_store.dart';
 import 'package:scbrf/router.dart';
+import 'package:scbrf/screens/screen.dart';
 import 'package:scbrf/selectors/selectors.dart';
 import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
@@ -96,38 +93,6 @@ class ArticlesScreenState extends State<ArticlesScreen> {
           });
         },
         child: listTile(e));
-  }
-
-  onVideoControllerEvent(
-      VideoPlayerController controller, Article playing) async {
-    if (mounted && MediaQuery.of(context).orientation != Orientation.portrait) {
-      return;
-    }
-    if (!mounted) {
-      if (controller.value.isPlaying) {
-        await controller.pause();
-      }
-      return;
-    }
-    if (controller.value.isPlaying) {
-      log.d('playing ${controller.dataSource}');
-      if (playingController != null && controller != playingController) {
-        await playingController!.pause();
-      }
-      playingArticle = playing;
-      playingController = controller;
-      SystemChrome.setPreferredOrientations([]);
-    } else {
-      if (controller == playingController) {
-        log.d('stop playing ${controller.dataSource}');
-        playingArticle = null;
-        playingController = null;
-      }
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitDown,
-        DeviceOrientation.portraitUp,
-      ]);
-    }
   }
 
   @override
@@ -292,138 +257,59 @@ class ArticlesScreenState extends State<ArticlesScreen> {
       },
       onTap: () {
         StoreProvider.of<AppState>(context)
-            .dispatch(FocusArticleSelectedAction(e, doRoute: true));
+            .dispatch(FocusArticleSelectedAction(e));
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            settings: const RouteSettings(name: '/webview'),
+            builder: (BuildContext context) => WebviewScreen(e),
+          ),
+        );
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (context, orientation) {
-      log.d('orientation change to $orientation');
-      if (orientation == Orientation.landscape && playingArticle != null) {
-        VideoControllers.singleton.get(playingArticle!, 'fullscreen Player');
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          Navigator.of(context).push(MaterialPageRoute<void>(
-            builder: (BuildContext context) =>
-                FullscreenVideoPlayer(playingArticle!),
-          ));
-        });
-      }
-      return StoreConnector<AppState, Articles>(
-        distinct: true,
-        converter: (Store<AppState> store) => articlesSelector(store.state),
-        builder: (ctx, articles) {
-          log.d('building articles screen');
-          return Scaffold(
-            appBar: AppBar(
-              centerTitle: false,
-              title: Text(articles.title),
-              actions: articles.focusPlanetId.startsWith('my:')
-                  ? <Widget>[
-                      Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
-                          child: GestureDetector(
-                            onTap: () async {
-                              StoreProvider.of<AppState>(context).dispatch(
-                                  NewDraftAction(articles.focusPlanetId
-                                      .substring('my:'.length)));
-                            },
-                            child: const Icon(
-                              Icons.note_alt_outlined,
-                              size: 26.0,
-                            ),
-                          )),
-                    ]
-                  : <Widget>[],
-            ),
-            body: ListView(
-              children: ListTile.divideTiles(
-                context: context,
-                tiles: articles.articles
-                    .where((e) => !deleted.contains(e.id))
-                    .map<Widget>((e) => articles.focusPlanetId.startsWith('my:')
-                        ? editableListTile(e)
-                        : listTile(e))
-                    .toList(),
-              ).toList(),
-            ),
-          );
-        },
-      );
-    });
-  }
-}
-
-class ArticleVideoPlayer extends StatefulWidget {
-  final Article article;
-  final Function? listenner;
-  const ArticleVideoPlayer(this.article, {this.listenner, Key? key})
-      : super(key: key);
-  @override
-  State<StatefulWidget> createState() => _ArticleVideoPlayerState();
-}
-
-class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
-  late VideoPlayerController _controller;
-  static const src = 'listtile';
-  var log = getLogger('_ArticleVideoPlayerState');
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoControllers.singleton.get(widget.article, src);
-    if (!_controller.value.isInitialized) {
-      _controller.initialize().then((_) async {
-        log.d(
-            'video init done, need set state ${widget.article.videoFilename}');
-        await Future.delayed(const Duration(milliseconds: 500));
-        setState(() {});
-
-        if (widget.listenner != null) {
-          _controller.addListener(() {
-            widget.listenner!(_controller, widget.article);
-          });
-        }
-      }).catchError((err) {
-        log.e(
-            'play video ${widget.article.videoFilename} meet error $err ', err);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    log.d(
-        'rebuild vide player widget ${widget.article.videoFilename} ${_controller.value.isInitialized}');
-    return _controller.value.isInitialized
-        ? GestureDetector(
-            onTap: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-              log.d('video player tapped!');
-            },
-            child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: VideoPlayer(_controller),
-            ),
-          )
-        : AspectRatio(
-            aspectRatio: 16.0 / 9,
-            child: Center(
-              child: LoadingAnimationWidget.staggeredDotsWave(
-                color: Colors.grey.shade400,
-                size: 30,
-              ),
-            ),
-          );
-  }
-
-  @override
-  void dispose() {
-    VideoControllers.singleton.dispose(widget.article, src);
-    super.dispose();
+    return StoreConnector<AppState, Articles>(
+      distinct: true,
+      converter: (Store<AppState> store) => articlesSelector(store.state),
+      builder: (ctx, articles) {
+        log.d('building articles screen');
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            title: Text(articles.title),
+            actions: articles.focusPlanetId.startsWith('my:')
+                ? <Widget>[
+                    Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: GestureDetector(
+                          onTap: () async {
+                            StoreProvider.of<AppState>(context).dispatch(
+                                NewDraftAction(articles.focusPlanetId
+                                    .substring('my:'.length)));
+                          },
+                          child: const Icon(
+                            Icons.note_alt_outlined,
+                            size: 26.0,
+                          ),
+                        )),
+                  ]
+                : <Widget>[],
+          ),
+          body: ListView(
+            children: ListTile.divideTiles(
+              context: context,
+              tiles: articles.articles
+                  .where((e) => !deleted.contains(e.id))
+                  .map<Widget>((e) => articles.focusPlanetId.startsWith('my:')
+                      ? editableListTile(e)
+                      : listTile(e))
+                  .toList(),
+            ).toList(),
+          ),
+        );
+      },
+    );
   }
 }

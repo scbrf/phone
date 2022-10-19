@@ -31,7 +31,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           Navigator.of(context)
-              .popUntil(ModalRoute.withName(ScbrfRoutes.articles));
+              .popUntil(ModalRoute.withName(ScbrfRoutes.webiew));
         });
       }
       return GestureDetector(
