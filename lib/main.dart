@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:al_downloader/al_downloader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +11,10 @@ import 'package:scbrf/middleware/middleware.dart';
 import 'services/service_locator.dart';
 
 void main() async {
-  await setupServiceLocator();
-  await ALDownloader.initialize();
+  if (Platform.isAndroid || Platform.isIOS) {
+    await setupServiceLocator();
+    await ALDownloader.initialize();
+  }
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,

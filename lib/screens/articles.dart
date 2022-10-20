@@ -149,7 +149,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
             child: Row(
               children: [
                 Text(
-                  '${formatDate(e.created)}',
+                  '${formatDate(e.created)} ${e.pinState}',
                   style: Theme.of(context).textTheme.caption,
                 ),
                 ...e.audioFilename.isNotEmpty

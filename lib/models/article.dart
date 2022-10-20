@@ -19,6 +19,7 @@ class Article {
   final bool editable;
   final String id;
   final String planetid;
+  final String pinState;
   final List<String> attachments;
   const Article(
       {this.id = '',
@@ -32,6 +33,7 @@ class Article {
       this.summary = '',
       this.planetid = '',
       this.content = '',
+      this.pinState = '',
       this.attachments = const [],
       this.title = ""});
 
@@ -43,6 +45,7 @@ class Article {
         read: json['read'] ?? false,
         title: json['title'] ?? '',
         url: json['url'] ?? '',
+        pinState: json['pinState'] ?? '',
         audioFilename: json['audioFilename'] ?? '',
         videoFilename: json['videoFilename'] ?? '',
         summary: json['summary'] ?? '',
@@ -93,6 +96,7 @@ class Article {
     String? url,
     String? summary,
     bool? editable,
+    String? pinState,
     String? id,
     List<String>? attachments,
     String? planetid,
@@ -103,6 +107,7 @@ class Article {
         created: created ?? this.created,
         read: read ?? this.read,
         starred: starred ?? this.starred,
+        pinState: pinState ?? this.pinState,
         audioFilename: audioFilename ?? this.audioFilename,
         videoFilename: videoFilename ?? this.videoFilename,
         title: title ?? this.title,

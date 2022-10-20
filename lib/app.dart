@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -24,12 +26,16 @@ class _AppState extends State<ScbrfApp> {
   @override
   void initState() {
     super.initState();
-    getIt<PageManager>().init();
+    if (Platform.isAndroid || Platform.isIOS) {
+      getIt<PageManager>().init();
+    }
   }
 
   @override
   void dispose() {
-    getIt<PageManager>().dispose();
+    if (Platform.isAndroid || Platform.isIOS) {
+      getIt<PageManager>().dispose();
+    }
     super.dispose();
   }
 
