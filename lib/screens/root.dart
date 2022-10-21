@@ -9,7 +9,6 @@ import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/components/Avatar.dart';
 import 'package:scbrf/components/create_planet_dialog.dart';
-import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/router.dart';
@@ -118,6 +117,7 @@ class HomeScreenState extends State<HomeScreen> {
                   log.d('need do refresh');
                   StoreProvider.of<AppState>(context)
                       .dispatch(RefreshStationAction(route: false));
+                  await Future.delayed(const Duration(seconds: 1));
                 },
                 child: Column(
                   children: [
