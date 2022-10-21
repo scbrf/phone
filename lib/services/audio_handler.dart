@@ -131,6 +131,13 @@ class MyAudioHandler extends BaseAudioHandler {
     queue.add(newQueue);
   }
 
+  @override
+  Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
+    _playlist.insert(index, _createAudioSource(mediaItem));
+    final newQueue = queue.value..insert(index, mediaItem);
+    queue.add(newQueue);
+  }
+
   UriAudioSource _createAudioSource(MediaItem mediaItem) {
     return AudioSource.uri(
       Uri.parse(mediaItem.extras!['url']),

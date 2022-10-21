@@ -233,6 +233,10 @@ class PageManager {
     _audioHandler.addQueueItem(mediaItem);
   }
 
+  Future<void> insert(int idx, MediaItem e) async {
+    _audioHandler.insertQueueItem(idx, e);
+  }
+
   void remove() {
     final lastIndex = _audioHandler.queue.value.length - 1;
     if (lastIndex < 0) return;
