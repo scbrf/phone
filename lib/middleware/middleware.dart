@@ -21,9 +21,9 @@ List<Middleware<AppState>> createMiddleware() {
     logger,
     TypedMiddleware<AppState, FindStationAction>(findStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
+    TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
     TypedMiddleware<AppState, RefreshStationAction>(loadStation),
-    TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
     TypedMiddleware<AppState, TriggerStarredArticleAction>(checkAndMarkStarred),
     TypedMiddleware<AppState, SetEditorDraftAction>(_saveDraft),
@@ -225,7 +225,8 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
     }
   } catch (ex) {
     log.e('load meet error $ex');
-    store.dispatch(NetworkError(ex.toString()));
+    store.dispatch(
+        NetworkError('${store.state.currentStation}:${ex.toString()}'));
   } finally {
     client.close();
   }

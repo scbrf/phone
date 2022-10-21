@@ -82,10 +82,11 @@ class QrScanScreenState extends State<QrScanScreen> {
     controller.scannedDataStream.listen((scanData) {
       if (scanData.code!.startsWith('scbrf://')) {
         controller.pauseCamera();
-        if (StoreProvider.of<AppState>(context).state.currentStation.isEmpty) {
-          StoreProvider.of<AppState>(context).dispatch(
-              CurrentStationSelectedAction(
-                  scanData.code!.substring('scbrf://'.length)));
+        var station = scanData.code!.substring('scbrf://'.length);
+        if (StoreProvider.of<AppState>(context).state.currentStation !=
+            station) {
+          StoreProvider.of<AppState>(context)
+              .dispatch(CurrentStationSelectedAction(station));
         }
       }
       log.d('got qr result ${scanData.code}');
