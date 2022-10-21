@@ -38,6 +38,7 @@ List<Middleware<AppState>> createMiddleware() {
         await api('/fair/markreaded', {});
         store.dispatch(MarkFairReadedAction());
       }
+      store.dispatch(RefreshStationAction(route: false));
       navigatorKey.currentState!.pushNamed(ScbrfRoutes.articles);
     })),
     TypedMiddleware<AppState, FocusArticleSelectedAction>(
