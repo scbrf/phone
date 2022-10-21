@@ -1,3 +1,4 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scbrf/models/article.dart';
@@ -46,7 +47,32 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
         child: Center(
           child: AspectRatio(
             aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+            child: Stack(
+              children: [
+                VideoPlayer(_controller),
+                ..._controller.value.isPlaying
+                    ? []
+                    : [
+                        FutureBuilder(
+                          future: _controller.position,
+                          initialData: const Duration(seconds: 0),
+                          builder: (context, snapshot) => Container(
+                            alignment: Alignment.bottomCenter,
+                            child: ProgressBar(
+                                progress: snapshot.data!,
+                                onSeek: (value) {
+                                  _controller.seekTo(value);
+                                },
+                                timeLabelTextStyle: Theme.of(context)
+                                    .textTheme
+                                    .button!
+                                    .copyWith(color: Colors.white),
+                                total: _controller.value.duration),
+                          ),
+                        )
+                      ]
+              ],
+            ),
           ),
         ),
       );
