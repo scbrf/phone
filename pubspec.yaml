@@ -1,7 +1,7 @@
 name: scbrf
 description: Scarborough is a Electron clone of Livid's Planet.
 publish_to: 'none'
-version: 0.0.18+18
+version: 0.0.19+19
 
 environment:
   sdk: '>=2.18.2 <3.0.0'
