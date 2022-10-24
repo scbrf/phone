@@ -159,6 +159,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                                 onTap: (() {
                                                   startDownload(
                                                       e.extras!['url']);
+                                                  setState(() {});
                                                 }),
                                                 child:
                                                     const Icon(Icons.download),
