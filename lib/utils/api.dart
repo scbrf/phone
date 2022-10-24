@@ -13,7 +13,10 @@ Future<Map<String, dynamic>> api(String url, Map<String, dynamic>? body) async {
   try {
     log.d('api to $url with body $body');
     var response = await client.post(Uri.http(apiEntry, url),
-        body: jsonEncode(body), headers: {"content-type": 'application/json'});
+        body: jsonEncode(body),
+        headers: {
+          "content-type": 'application/json'
+        }).timeout(const Duration(seconds: 3));
     String rspText = utf8.decode(response.bodyBytes);
     log.d('api got response: $rspText');
     return jsonDecode(rspText) as Map<String, dynamic>;
