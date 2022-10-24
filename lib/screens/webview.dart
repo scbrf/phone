@@ -235,7 +235,7 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
                   children: [
                     VideoPlayer(_controller),
                     Container(
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: GestureDetector(
@@ -248,7 +248,7 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
                                 String? device = await showModalBottomSheet<
                                         String>(
                                     context: context,
-                                    builder: ((context) => Container(
+                                    builder: ((context) => SizedBox(
                                           height: 200,
                                           child: Center(
                                             child: ListView.separated(
