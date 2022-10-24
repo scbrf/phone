@@ -62,11 +62,6 @@ class PageManager {
         }
       }
     }
-    int? pos = prefs.getInt('playpos');
-    if (pos != null && mediaItems.isNotEmpty && id != null && id.isNotEmpty) {
-      log.d("should seek to $pos");
-      _audioHandler.seek(Duration(milliseconds: pos));
-    }
   }
 
   savePlayList(List<MediaItem> list) async {
@@ -84,9 +79,11 @@ class PageManager {
   }
 
   savePosition(int pos) async {
-    if ((pos < lastPos) || (pos - lastPos > 5000)) {
+    final mediaItem = _audioHandler.mediaItem.value;
+    if (mediaItem != null && pos - lastPos > 5000) {
+      log.d('save progress for item ${mediaItem.title} to $pos');
       final prefs = await SharedPreferences.getInstance();
-      prefs.setInt('playpos', pos);
+      prefs.setInt('${mediaItem!.id}_pos', pos);
       lastPos = pos;
     }
   }
@@ -171,8 +168,22 @@ class PageManager {
     _audioHandler.mediaItem.listen((mediaItem) {
       currentSongTitleNotifier.value = mediaItem?.title ?? '';
       _updateSkipButtons();
+      _loadProgress();
       savePlaylistFocus(mediaItem?.id);
     });
+  }
+
+  void _loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mediaItem = _audioHandler.mediaItem.value;
+    if (mediaItem != null) {
+      int? pos = prefs.getInt('${mediaItem.id}_pos');
+      lastPos = 0;
+      log.d('load progress for item ${mediaItem.title} to $pos');
+      if (pos != null) {
+        _audioHandler.seek(Duration(milliseconds: pos));
+      }
+    }
   }
 
   void _updateSkipButtons() {
