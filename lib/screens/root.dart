@@ -485,9 +485,15 @@ class HomeScreenState extends State<HomeScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: Text(
-                        'from ${state.currentStation}',
-                        style: Theme.of(context).textTheme.caption,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              ScbrfRoutes.scan, (route) => false);
+                        },
+                        child: Text(
+                          'from ${state.currentStation}',
+                          style: Theme.of(context).textTheme.caption,
+                        ),
                       ),
                     )
                   ],

@@ -8,6 +8,7 @@ import 'package:scbrf/components/FloatPlayBtn.dart';
 import 'package:scbrf/components/fullscreen_video_player.dart';
 import 'package:scbrf/models/models.dart';
 import 'package:scbrf/models/vc_store.dart';
+import 'package:scbrf/utils/api.dart';
 import 'package:scbrf/utils/logger.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -229,9 +230,72 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
               log.d('video player tapped!');
             },
             child: AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: VideoPlayer(_controller),
-            ),
+                aspectRatio: _controller.value.aspectRatio,
+                child: Stack(
+                  children: [
+                    VideoPlayer(_controller),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: GestureDetector(
+                            onTap: () async {
+                              var messager = ScaffoldMessenger.of(context);
+                              var rsp = await api('/dlna/list', {});
+                              log.d('got devices: $rsp');
+                              if (rsp['devices'] != null &&
+                                  rsp['devices'].length > 0) {
+                                String? device = await showModalBottomSheet<
+                                        String>(
+                                    context: context,
+                                    builder: ((context) => Container(
+                                          height: 200,
+                                          child: Center(
+                                            child: ListView.separated(
+                                                itemBuilder: ((context,
+                                                        index) =>
+                                                    ListTile(
+                                                      onTap: () {
+                                                        Navigator.of(context)
+                                                            .pop(rsp['devices']
+                                                                    [index]
+                                                                ['name']);
+                                                      },
+                                                      title: Text(
+                                                        rsp['devices'][index]
+                                                            ['name'],
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                    )),
+                                                separatorBuilder: (context,
+                                                        index) =>
+                                                    const Divider(height: 1),
+                                                itemCount:
+                                                    rsp['devices'].length),
+                                          ),
+                                        )));
+                                log.d('user select device $device');
+                                if (device != null) {
+                                  api('/dlna/play', {
+                                    "device": device,
+                                    "url": _controller.dataSource
+                                  });
+                                }
+                              } else {
+                                messager.showSnackBar(const SnackBar(
+                                    content: Text("no devices found!")));
+                              }
+                            },
+                            child: const Icon(
+                              Icons.share_rounded,
+                              size: 20,
+                              color: Colors.white,
+                            )),
+                      ),
+                    ),
+                  ],
+                )),
           )
         : AspectRatio(
             aspectRatio: 16.0 / 9,
