@@ -8,6 +8,7 @@ import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/notifiers/play_button_notifier.dart';
 import 'package:scbrf/notifiers/progress_notifier.dart';
 import 'package:scbrf/services/service_locator.dart';
+import 'package:scbrf/utils/logger.dart';
 
 class MusicPlayer extends StatefulWidget {
   const MusicPlayer({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class MusicPlayer extends StatefulWidget {
 }
 
 class _MusicPlayerState extends State<MusicPlayer> {
+  var log = getLogger('player');
   replaceWithLocal(
       List<MediaItem> list, String playing, ButtonState state) async {
     for (int i = 0; i < list.length; i++) {

@@ -217,11 +217,6 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
     if (action is! RefreshStationAction || action.route == true) {
       navigatorKey.currentState!
           .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
-    } else {
-      ScaffoldMessenger.of(navigatorKey.currentContext!)
-          .showSnackBar(const SnackBar(
-        content: Text('site has been refreshed!'),
-      ));
     }
   } catch (ex) {
     log.e('load meet error $ex');

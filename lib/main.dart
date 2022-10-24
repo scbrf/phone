@@ -11,11 +11,11 @@ import 'package:scbrf/middleware/middleware.dart';
 import 'services/service_locator.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid || Platform.isIOS) {
     await setupServiceLocator();
     await ALDownloader.initialize();
   }
-  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
