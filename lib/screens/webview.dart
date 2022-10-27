@@ -145,7 +145,7 @@ class WebviewScreenState extends State<WebviewScreen> {
                       debuggingEnabled: true,
                       onProgress: (progress) {
                         log.d('loading webpage $progress');
-                        if (loading) {
+                        if (loading && progress >= 60) {
                           loading = false;
                           setState(() {});
                         }
