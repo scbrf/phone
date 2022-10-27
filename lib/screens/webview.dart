@@ -117,52 +117,62 @@ class WebviewScreenState extends State<WebviewScreen> {
                   ? []
                   : [ArticleVideoPlayer(widget.article)],
               Expanded(
-                child: WebView(
-                  key: const ValueKey('webview'),
-                  initialUrl: widget.article.url,
-                  allowsInlineMediaPlayback: true,
-                  onWebViewCreated: (c) {
-                    controller = c;
-                  },
-                  javascriptChannels: <JavascriptChannel>{
-                    JavascriptChannel(
-                      name: 'scbrf',
-                      onMessageReceived: (JavascriptMessage message) async {
-                        injectEthereum('');
+                child: Stack(
+                  children: [
+                    WebView(
+                      key: const ValueKey('webview'),
+                      initialUrl: widget.article.url,
+                      allowsInlineMediaPlayback: true,
+                      onWebViewCreated: (c) {
+                        controller = c;
                       },
-                    ),
-                    JavascriptChannel(
-                      name: 'ipc',
-                      onMessageReceived: (JavascriptMessage message) async {
-                        log.d('receive from web ${message.message}');
-                        runWebInvoke(message.message);
+                      javascriptChannels: <JavascriptChannel>{
+                        JavascriptChannel(
+                          name: 'scbrf',
+                          onMessageReceived: (JavascriptMessage message) async {
+                            injectEthereum('');
+                          },
+                        ),
+                        JavascriptChannel(
+                          name: 'ipc',
+                          onMessageReceived: (JavascriptMessage message) async {
+                            log.d('receive from web ${message.message}');
+                            runWebInvoke(message.message);
+                          },
+                        )
                       },
-                    )
-                  },
-                  userAgent: 'Planet/MobileJS',
-                  debuggingEnabled: true,
-                  onProgress: (progress) {
-                    log.d('loading webpage $progress');
-                    if (progress >= 100) {
-                      setState(() {
-                        loading = false;
-                      });
-                    }
-                  },
-                  onPageStarted: injectEthereum,
-                  onPageFinished: (url) async {
-                    if (!widget.article.read && !widget.article.editable) {
-                      StoreProvider.of<AppState>(context).dispatch(
-                          MarkArticleReadedAction(
-                              widget.article.planetid, widget.article.id));
-                    }
-                    await controller!.runJavascript("""
+                      userAgent: 'Planet/MobileJS',
+                      debuggingEnabled: true,
+                      onProgress: (progress) {
+                        log.d('loading webpage $progress');
+                        if (loading) {
+                          loading = false;
+                          setState(() {});
+                        }
+                      },
+                      onPageStarted: injectEthereum,
+                      onPageFinished: (url) async {
+                        if (!widget.article.read && !widget.article.editable) {
+                          StoreProvider.of<AppState>(context).dispatch(
+                              MarkArticleReadedAction(
+                                  widget.article.planetid, widget.article.id));
+                        }
+                        await controller!.runJavascript("""
                     if (document.querySelector('.video-container')){
                       document.querySelector('.video-container').style.display = 'none';
                     }
                   """);
-                  },
-                  javascriptMode: JavascriptMode.unrestricted,
+                      },
+                      javascriptMode: JavascriptMode.unrestricted,
+                    ),
+                    ...loading
+                        ? [
+                            const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          ]
+                        : []
+                  ],
                 ),
               )
             ],
