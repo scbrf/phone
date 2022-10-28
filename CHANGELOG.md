@@ -1,2 +1,1 @@
-1. 更改DLNA图标位置
-2. WebView Loading indicator
+1. 修正iOS没有选择本地图片权限的bug
