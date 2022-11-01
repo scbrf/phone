@@ -121,7 +121,8 @@ class WebviewScreenState extends State<WebviewScreen> {
                   children: [
                     WebView(
                       key: const ValueKey('webview'),
-                      initialUrl: widget.article.url,
+                      initialUrl:
+                          "${widget.article.url}?seed=${DateTime.now().millisecondsSinceEpoch}",
                       allowsInlineMediaPlayback: true,
                       onWebViewCreated: (c) {
                         controller = c;

@@ -55,7 +55,7 @@ class _DraftScreenState extends State<DraftScreen> {
                               List<XFile> files = await _picker.pickMultiImage(
                                 imageQuality: 80,
                               );
-                              List<String> attachments = [];
+                              List<String> attachments = draft.attachments;
                               for (var file in files) {
                                 String draftPath = await draft.getDraftDir();
                                 String attachPath =
