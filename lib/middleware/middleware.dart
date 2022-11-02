@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_autoupdate/flutter_autoupdate.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:redux/redux.dart';
 import 'package:scbrf/actions/actions.dart';
 import 'package:scbrf/models/models.dart';
@@ -12,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
+import 'package:version/version.dart';
 
 final log = getLogger('middleware');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -23,6 +27,7 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
+    TypedMiddleware<AppState, CurrentStationSelectedAction>(checkUpdate),
     TypedMiddleware<AppState, RefreshStationAction>(loadStation),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
     TypedMiddleware<AppState, TriggerStarredArticleAction>(checkAndMarkStarred),
@@ -188,6 +193,61 @@ setApiEntry(Store<AppState> store, CurrentStationSelectedAction action,
 Future<String?> loadLastStation() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('last_station');
+}
+
+checkUpdate(Store<AppState> store, CurrentStationSelectedAction action,
+    NextDispatcher next) async {
+  next(action);
+  if (Platform.isAndroid) {
+    //for ios, use the altstore way
+
+    var status = await Permission.storage.status;
+    if (status.isDenied) {
+      await Permission.storage.request();
+    }
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    var uri = Uri.http(
+        store.state.currentStation, '/versions/${packageInfo.packageName}');
+    log.d('auto update url set to ${uri.toString()}');
+    var updater = UpdateManager(versionUrl: uri.toString());
+    try {
+      var result = await updater.fetchUpdates();
+      if (result != null &&
+          result.latestVersion > Version.parse(packageInfo.version)) {
+        showDialog(
+          context: navigatorKey.currentContext!,
+          builder: (context) => AlertDialog(
+              content: Text(result.releaseNotes),
+              title: Text('version ${result.latestVersion} available!'),
+              actions: [
+                TextButton(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: const Text("update"),
+                  onPressed: () async {
+                    Navigator.of(context).pop(false);
+                    var controller = await result.initializeUpdate();
+                    controller.stream.listen((event) async {
+                      if (event.completed) {
+                        log.d("Downloaded completed");
+                        await controller.close();
+                        await result.runUpdate(event.path, autoExit: true);
+                      }
+                    });
+                  },
+                ),
+              ]),
+        );
+      }
+    } catch (e) {
+      log.d('error on auto update', e);
+    }
+  }
 }
 
 loadStation(Store<AppState> store, action, NextDispatcher next) async {
