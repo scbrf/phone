@@ -197,6 +197,7 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
   late VideoPlayerController _controller;
   static const src = 'listtile';
   var log = getLogger('_ArticleVideoPlayerState');
+  String videoPlayError = '';
   @override
   void initState() {
     super.initState();
@@ -214,6 +215,9 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
           });
         }
       }).catchError((err) {
+        setState(() {
+          videoPlayError = '$err';
+        });
         log.e(
             'play video ${widget.article.videoFilename} meet error $err ', err);
       });
@@ -311,10 +315,12 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
         : AspectRatio(
             aspectRatio: 16.0 / 9,
             child: Center(
-              child: LoadingAnimationWidget.staggeredDotsWave(
-                color: Colors.grey.shade400,
-                size: 30,
-              ),
+              child: videoPlayError.isEmpty
+                  ? LoadingAnimationWidget.staggeredDotsWave(
+                      color: Colors.grey.shade400,
+                      size: 30,
+                    )
+                  : Text(videoPlayError),
             ),
           );
   }
