@@ -35,21 +35,32 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
               .popUntil(ModalRoute.withName(ScbrfRoutes.webiew));
         });
       }
-      return GestureDetector(
-        onTap: () {
-          setState(() {
-            _controller.value.isPlaying
-                ? _controller.pause()
-                : _controller.play();
-          });
-          log.d('video player tapped!');
-        },
-        child: Center(
+      return Align(
+        child: GestureDetector(
+          onTap: () {
+            if (_controller.value.isPlaying) {
+              //将会切换到暂停状态
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            } else {
+              //将会切换到播放状态
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                  overlays: []);
+            }
+            setState(() {
+              _controller.value.isPlaying
+                  ? _controller.pause()
+                  : _controller.play();
+            });
+            log.d('video player tapped!');
+          },
           child: AspectRatio(
             aspectRatio: _controller.value.aspectRatio,
             child: Stack(
               children: [
-                VideoPlayer(_controller),
+                Hero(
+                  tag: 'hero_${_controller.dataSource}',
+                  child: VideoPlayer(_controller),
+                ),
                 ..._controller.value.isPlaying
                     ? []
                     : [
@@ -58,16 +69,19 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                           initialData: const Duration(seconds: 0),
                           builder: (context, snapshot) => Container(
                             alignment: Alignment.bottomCenter,
-                            child: ProgressBar(
-                                progress: snapshot.data!,
-                                onSeek: (value) {
-                                  _controller.seekTo(value);
-                                },
-                                timeLabelTextStyle: Theme.of(context)
-                                    .textTheme
-                                    .button!
-                                    .copyWith(color: Colors.white),
-                                total: _controller.value.duration),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 30),
+                              child: ProgressBar(
+                                  progress: snapshot.data!,
+                                  onSeek: (value) {
+                                    _controller.seekTo(value);
+                                  },
+                                  timeLabelTextStyle: Theme.of(context)
+                                      .textTheme
+                                      .button!
+                                      .copyWith(color: Colors.white),
+                                  total: _controller.value.duration),
+                            ),
                           ),
                         )
                       ]

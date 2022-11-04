@@ -110,73 +110,80 @@ class WebviewScreenState extends State<WebviewScreen> {
       }
       return Scaffold(
         floatingActionButton: const FloatPlayBtn(),
-        body: SafeArea(
-          child: Column(
-            children: [
-              ...widget.article.videoFilename.isEmpty
-                  ? []
-                  : [ArticleVideoPlayer(widget.article)],
-              Expanded(
-                child: Stack(
-                  children: [
-                    WebView(
-                      key: const ValueKey('webview'),
-                      initialUrl:
-                          "${widget.article.url}?seed=${DateTime.now().millisecondsSinceEpoch}",
-                      allowsInlineMediaPlayback: true,
-                      onWebViewCreated: (c) {
-                        controller = c;
-                      },
-                      javascriptChannels: <JavascriptChannel>{
-                        JavascriptChannel(
-                          name: 'scbrf',
-                          onMessageReceived: (JavascriptMessage message) async {
-                            injectEthereum('');
-                          },
-                        ),
-                        JavascriptChannel(
-                          name: 'ipc',
-                          onMessageReceived: (JavascriptMessage message) async {
-                            log.d('receive from web ${message.message}');
-                            runWebInvoke(message.message);
-                          },
-                        )
-                      },
-                      userAgent: 'Planet/MobileJS',
-                      debuggingEnabled: true,
-                      onProgress: (progress) {
-                        log.d('loading webpage $progress');
-                        if (loading && progress >= 60) {
-                          loading = false;
-                          setState(() {});
-                        }
-                      },
-                      onPageStarted: injectEthereum,
-                      onPageFinished: (url) async {
-                        if (!widget.article.read && !widget.article.editable) {
-                          StoreProvider.of<AppState>(context).dispatch(
-                              MarkArticleReadedAction(
-                                  widget.article.planetid, widget.article.id));
-                        }
-                        await controller!.runJavascript("""
+        body: Container(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                ...widget.article.videoFilename.isEmpty
+                    ? []
+                    : [ArticleVideoPlayer(widget.article)],
+                Expanded(
+                  child: Stack(
+                    children: [
+                      WebView(
+                        key: const ValueKey('webview'),
+                        initialUrl:
+                            "${widget.article.url}?seed=${DateTime.now().millisecondsSinceEpoch}",
+                        allowsInlineMediaPlayback: true,
+                        onWebViewCreated: (c) {
+                          controller = c;
+                        },
+                        javascriptChannels: <JavascriptChannel>{
+                          JavascriptChannel(
+                            name: 'scbrf',
+                            onMessageReceived:
+                                (JavascriptMessage message) async {
+                              injectEthereum('');
+                            },
+                          ),
+                          JavascriptChannel(
+                            name: 'ipc',
+                            onMessageReceived:
+                                (JavascriptMessage message) async {
+                              log.d('receive from web ${message.message}');
+                              runWebInvoke(message.message);
+                            },
+                          )
+                        },
+                        userAgent: 'Planet/MobileJS',
+                        debuggingEnabled: true,
+                        onProgress: (progress) {
+                          log.d('loading webpage $progress');
+                          if (loading && progress >= 60) {
+                            loading = false;
+                            setState(() {});
+                          }
+                        },
+                        onPageStarted: injectEthereum,
+                        onPageFinished: (url) async {
+                          if (!widget.article.read &&
+                              !widget.article.editable) {
+                            StoreProvider.of<AppState>(context).dispatch(
+                                MarkArticleReadedAction(widget.article.planetid,
+                                    widget.article.id));
+                          }
+                          await controller!.runJavascript("""
                     if (document.querySelector('.video-container')){
                       document.querySelector('.video-container').style.display = 'none';
                     }
                   """);
-                      },
-                      javascriptMode: JavascriptMode.unrestricted,
-                    ),
-                    ...loading
-                        ? [
-                            const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          ]
-                        : []
-                  ],
-                ),
-              )
-            ],
+                        },
+                        javascriptMode: JavascriptMode.unrestricted,
+                      ),
+                      ...loading
+                          ? [
+                              const Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            ]
+                          : []
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       );
@@ -244,73 +251,72 @@ class _ArticleVideoPlayerState extends State<ArticleVideoPlayer> {
               });
               log.d('video player tapped!');
             },
-            child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: Stack(
-                  children: [
-                    VideoPlayer(_controller),
-                    Container(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: GestureDetector(
-                            onTap: () async {
-                              var messager = ScaffoldMessenger.of(context);
-                              var rsp = await api('/dlna/list', {});
-                              log.d('got devices: $rsp');
-                              if (rsp['devices'] != null &&
-                                  rsp['devices'].length > 0) {
-                                String? device = await showModalBottomSheet<
-                                        String>(
-                                    context: context,
-                                    builder: ((context) => SizedBox(
-                                          height: 200,
-                                          child: Center(
-                                            child: ListView.separated(
-                                                itemBuilder: ((context,
-                                                        index) =>
-                                                    ListTile(
-                                                      onTap: () {
-                                                        Navigator.of(context)
-                                                            .pop(rsp['devices']
-                                                                    [index]
-                                                                ['name']);
-                                                      },
-                                                      title: Text(
+            child: Stack(
+              children: [
+                Hero(
+                  tag: 'hero_${_controller.dataSource}',
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: GestureDetector(
+                        onTap: () async {
+                          var messager = ScaffoldMessenger.of(context);
+                          var rsp = await api('/dlna/list', {});
+                          log.d('got devices: $rsp');
+                          if (rsp['devices'] != null &&
+                              rsp['devices'].length > 0) {
+                            String? device = await showModalBottomSheet<String>(
+                                context: context,
+                                builder: ((context) => SizedBox(
+                                      height: 200,
+                                      child: Center(
+                                        child: ListView.separated(
+                                            itemBuilder: ((context, index) =>
+                                                ListTile(
+                                                  onTap: () {
+                                                    Navigator.of(context).pop(
                                                         rsp['devices'][index]
-                                                            ['name'],
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    )),
-                                                separatorBuilder: (context,
-                                                        index) =>
+                                                            ['name']);
+                                                  },
+                                                  title: Text(
+                                                    rsp['devices'][index]
+                                                        ['name'],
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                )),
+                                            separatorBuilder:
+                                                (context, index) =>
                                                     const Divider(height: 1),
-                                                itemCount:
-                                                    rsp['devices'].length),
-                                          ),
-                                        )));
-                                log.d('user select device $device');
-                                if (device != null) {
-                                  api('/dlna/play', {
-                                    "device": device,
-                                    "url": _controller.dataSource
-                                  });
-                                }
-                              } else {
-                                messager.showSnackBar(const SnackBar(
-                                    content: Text("no devices found!")));
-                              }
-                            },
-                            child: const Icon(
-                              Icons.share_rounded,
-                              size: 20,
-                              color: Colors.white,
-                            )),
-                      ),
-                    ),
-                  ],
-                )),
+                                            itemCount: rsp['devices'].length),
+                                      ),
+                                    )));
+                            log.d('user select device $device');
+                            if (device != null) {
+                              api('/dlna/play', {
+                                "device": device,
+                                "url": _controller.dataSource
+                              });
+                            }
+                          } else {
+                            messager.showSnackBar(const SnackBar(
+                                content: Text("no devices found!")));
+                          }
+                        },
+                        child: const Icon(
+                          Icons.share_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        )),
+                  ),
+                ),
+              ],
+            ),
           )
         : AspectRatio(
             aspectRatio: 16.0 / 9,
