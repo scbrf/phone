@@ -143,7 +143,7 @@ class SingleColumnArticlesState extends State<SingleColumnArticles> {
               ...widget.articles[index].audioFilename.isNotEmpty
                   ? [
                       Padding(
-                        padding: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.only(left: 10),
                         child: Icon(Icons.volume_up_outlined,
                             size:
                                 Theme.of(context).textTheme.caption!.fontSize),
@@ -153,15 +153,48 @@ class SingleColumnArticlesState extends State<SingleColumnArticles> {
               ...widget.articles[index].videoFilename.isNotEmpty
                   ? [
                       Padding(
-                        padding: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.only(left: 10),
                         child: Icon(Icons.video_camera_back_outlined,
                             size:
                                 Theme.of(context).textTheme.caption!.fontSize),
                       )
                     ]
                   : [],
-              Text(widget.articles[index].pinState,
-                  style: Theme.of(context).textTheme.caption)
+              ...widget.articles[index].pinState == 'ready'
+                  ? [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Icon(Icons.cloud_done_outlined,
+                            size:
+                                Theme.of(context).textTheme.caption!.fontSize),
+                      )
+                    ]
+                  : [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Icon(Icons.cloud_download_outlined,
+                            size:
+                                Theme.of(context).textTheme.caption!.fontSize),
+                      )
+                    ],
+              ...!widget.articles[index].read &&
+                      !widget.articles[index].editable
+                  ? [
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: Colors.green,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
+                        width: Theme.of(context).textTheme.caption!.fontSize! *
+                            0.8,
+                        height: Theme.of(context).textTheme.caption!.fontSize! *
+                            0.8,
+                      )
+                    ]
+                  : []
             ],
           ))),
       separatorBuilder: ((context, index) => const Divider(
