@@ -82,8 +82,9 @@ class SingleColumnArticlesState extends State<SingleColumnArticles> {
   }
 
   String getImage(Article article) {
+    if (article.thumbnail.isNotEmpty) return article.thumbnail;
     for (String a in article.attachments) {
-      if (a.endsWith('.png')) return a;
+      if (a.endsWith('.png')) return '${article.url}$a';
     }
     return '';
   }
@@ -108,10 +109,7 @@ class SingleColumnArticlesState extends State<SingleColumnArticles> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...getImage(widget.articles[index]).isNotEmpty
-                  ? [
-                      Image.network(
-                          '${widget.articles[index].url}${getImage(widget.articles[index])}')
-                    ]
+                  ? [Image.network(getImage(widget.articles[index]))]
                   : [],
               Text(
                 widget.articles[index].title,

@@ -21,6 +21,7 @@ class Article {
   final String id;
   final String planetid;
   final String pinState;
+  final String thumbnail;
   final List<String> attachments;
   final FollowingPlanet? planet;
   const Article(
@@ -34,6 +35,7 @@ class Article {
       this.videoFilename = '',
       this.summary = '',
       this.planetid = '',
+      this.thumbnail = '',
       this.planet,
       this.content = '',
       this.pinState = '',
@@ -53,6 +55,7 @@ class Article {
         videoFilename: json['videoFilename'] ?? '',
         summary: json['summary'] ?? '',
         content: json['content'] ?? '',
+        thumbnail: json['thumbnail'] ?? '',
         editable: json['editable'] ?? false,
         attachments: json['attachments'] == null
             ? const []
@@ -101,6 +104,7 @@ class Article {
     bool? editable,
     String? pinState,
     String? id,
+    String? thumbnail,
     List<String>? attachments,
     String? planetid,
     FollowingPlanet? planet,
@@ -116,6 +120,7 @@ class Article {
         videoFilename: videoFilename ?? this.videoFilename,
         title: title ?? this.title,
         url: url ?? this.url,
+        thumbnail: thumbnail ?? this.thumbnail,
         summary: summary ?? this.summary,
         editable: editable ?? this.editable,
         attachments: attachments ?? this.attachments,
