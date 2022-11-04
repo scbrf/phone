@@ -16,7 +16,7 @@ class FollowingPlanet {
       this.avatar = ''});
 
   static fromJson(Map<String, dynamic> json) {
-    return FollowingPlanet(
+    var p = FollowingPlanet(
         id: json['id'] ?? '',
         name: json['name'] ?? '',
         cid: json['cid'] ?? '',
@@ -26,6 +26,8 @@ class FollowingPlanet {
             return Article.fromJson(e).copyWith(planetid: json['id']);
           },
         ).toList());
+    return p.copyWith(
+        articles: p.articles.map((e) => e.copyWith(planet: p)).toList());
   }
 
   FollowingPlanet copyWith(

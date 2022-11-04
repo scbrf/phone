@@ -27,7 +27,6 @@ List<Middleware<AppState>> createMiddleware() {
     TypedMiddleware<AppState, CurrentStationSelectedAction>(saveLastStation),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(setApiEntry),
     TypedMiddleware<AppState, CurrentStationSelectedAction>(loadStation),
-    TypedMiddleware<AppState, CurrentStationSelectedAction>(checkUpdate),
     TypedMiddleware<AppState, RefreshStationAction>(loadStation),
     TypedMiddleware<AppState, MarkArticleReadedAction>(checkAndMarkReaded),
     TypedMiddleware<AppState, TriggerStarredArticleAction>(checkAndMarkStarred),
@@ -195,9 +194,10 @@ Future<String?> loadLastStation() async {
   return prefs.getString('last_station');
 }
 
-checkUpdate(Store<AppState> store, CurrentStationSelectedAction action,
-    NextDispatcher next) async {
-  next(action);
+checkUpdate(
+  Store<AppState> store,
+  CurrentStationSelectedAction action,
+) async {
   if (Platform.isAndroid) {
     //for ios, use the altstore way
 
@@ -215,7 +215,7 @@ checkUpdate(Store<AppState> store, CurrentStationSelectedAction action,
       var result = await updater.fetchUpdates();
       if (result != null &&
           result.latestVersion > Version.parse(packageInfo.version)) {
-        showDialog(
+        await showDialog(
           context: navigatorKey.currentContext!,
           builder: (context) => AlertDialog(
               content: Text(result.releaseNotes),
@@ -275,8 +275,9 @@ loadStation(Store<AppState> store, action, NextDispatcher next) async {
           ipfsGateway: mapBody['ipfsGateway']),
     );
     if (action is! RefreshStationAction || action.route == true) {
+      await checkUpdate(store, action);
       navigatorKey.currentState!
-          .pushNamedAndRemoveUntil(ScbrfRoutes.root, ((route) => false));
+          .pushNamedAndRemoveUntil(ScbrfRoutes.news, ((route) => false));
     }
   } catch (ex) {
     log.e('load meet error $ex');

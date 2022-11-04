@@ -58,6 +58,21 @@ Map<String, int> numberSelector(AppState a) {
   return ret;
 }
 
+List<List<Article>> allFollowingArticles(AppState s, int group) {
+  var all = s.following.fold<List<Article>>([], (previousValue, element) {
+    return [...previousValue, ...element.articles];
+  })
+    ..sort((a, b) => b.created - a.created);
+  return List.generate(
+      group,
+      (index) => all
+          .asMap()
+          .keys
+          .where((idx) => idx % group == index)
+          .map((idx) => all[idx])
+          .toList()).toList();
+}
+
 Articles articlesSelector(AppState s) {
   String articlesTitle;
   List<Article> articles = [];

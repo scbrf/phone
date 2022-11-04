@@ -53,6 +53,7 @@ class _AppState extends State<ScbrfApp> {
           ScbrfRoutes.fair: (context) => const FairRequestScreen(),
           ScbrfRoutes.root: (context) => const HomeScreen(),
           ScbrfRoutes.musicPlayer: (context) => const MusicPlayer(),
+          ScbrfRoutes.news: (context) => const NewsScreen(),
           ScbrfRoutes.draft: (context) => DraftScreen(
               widget.store.state.draft.title, widget.store.state.draft.content),
           ScbrfRoutes.home: (context) => LoadingScreen(() {

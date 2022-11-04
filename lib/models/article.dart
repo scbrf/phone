@@ -3,6 +3,7 @@ import 'package:markdown/markdown.dart';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scbrf/models/FollowingPlanet.dart';
 import 'package:scbrf/utils/write_basic.dart';
 
 @immutable
@@ -21,6 +22,7 @@ class Article {
   final String planetid;
   final String pinState;
   final List<String> attachments;
+  final FollowingPlanet? planet;
   const Article(
       {this.id = '',
       this.created = 0,
@@ -32,6 +34,7 @@ class Article {
       this.videoFilename = '',
       this.summary = '',
       this.planetid = '',
+      this.planet,
       this.content = '',
       this.pinState = '',
       this.attachments = const [],
@@ -100,6 +103,7 @@ class Article {
     String? id,
     List<String>? attachments,
     String? planetid,
+    FollowingPlanet? planet,
   }) {
     return Article(
         id: id ?? this.id,
@@ -115,7 +119,8 @@ class Article {
         summary: summary ?? this.summary,
         editable: editable ?? this.editable,
         attachments: attachments ?? this.attachments,
-        content: content ?? this.content);
+        content: content ?? this.content,
+        planet: planet ?? this.planet);
   }
 
   Future<void> renderDraftPreview() async {
