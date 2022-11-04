@@ -7,7 +7,7 @@ import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:scbrf/PageManager.dart';
 import 'package:scbrf/actions/actions.dart';
-import 'package:scbrf/components/Avatar.dart';
+import 'package:scbrf/components/avatar.dart';
 import 'package:scbrf/components/create_planet_dialog.dart';
 import 'package:scbrf/components/FollowingPlanetDialog.dart';
 import 'package:scbrf/models/models.dart';

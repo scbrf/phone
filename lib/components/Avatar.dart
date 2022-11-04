@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 class Avatar extends StatefulWidget {
   final String url;
   final String title;
-  const Avatar(this.url, this.title, {Key? key}) : super(key: key);
+  final double? size;
+  const Avatar(this.url, this.title, {Key? key, this.size}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AvatarState();
@@ -18,17 +19,23 @@ class _AvatarState extends State<Avatar> {
   Widget build(BuildContext context) {
     if (widget.url.isEmpty || kDebugMode) {
       return CircleAvatar(
-        child: Text(widget.title.substring(0, 1).toUpperCase()),
+        radius: widget.size,
+        child: Text(
+          widget.title.substring(0, 1).toUpperCase(),
+          style: TextStyle(fontSize: widget.size ?? 8),
+        ),
       );
     } else {
       return CircleAvatar(
+        radius: widget.size,
         backgroundImage:
             CachedNetworkImageProvider(widget.url, errorListener: () {
           setState(() {
             imgError = true;
           });
         }),
-        child: Text(imgError ? widget.title.substring(0, 1).toUpperCase() : ''),
+        child: Text(imgError ? widget.title.substring(0, 1).toUpperCase() : '',
+            style: TextStyle(fontSize: widget.size ?? 8)),
       );
     }
   }
